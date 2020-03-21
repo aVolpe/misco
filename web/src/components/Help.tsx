@@ -1,11 +1,15 @@
 import React from 'react';
-import {Row} from 'antd';
+import {Button, Row} from 'antd';
 
 
-export function Help() {
+export function Help(props: { onNewInvoice: () => void }) {
     return <div>
         <Row>
-            Puedes apretar este boton para agregar una nueva factura
+            Puedes apretar
+            <Button title="Agregar" onClick={props.onNewInvoice}>
+                este boton
+            </Button>
+            para agregar una nueva factura
         </Row>
         <Row>
             Las facturas se autocompletan con info de <a href="https://ruc.volpe.com.py">https://ruc.volpe.com.py</a>

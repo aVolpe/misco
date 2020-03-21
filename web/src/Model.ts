@@ -29,7 +29,7 @@ export interface Invoice {
 
 }
 
-export type NetworkResource<T, E = NetworkError> = {
+export type Async<T, E = NetworkError> = {
     state: 'NO_REQUESTED'
 } | {
     state: 'FETCHING'
@@ -46,24 +46,33 @@ export const NRHelper = {
     fetching: () => ({state: 'FETCHING' as const}),
     loaded: <T>(data: T) => ({state: 'LOADED' as const, data}),
     error: <E>(error: E) => ({state: 'ERROR' as const, error}),
+
+    or: function <T, E>(nr: Async<T, E>, def: T) {
+        if (nr.state === 'LOADED') return nr.data;
+        return def;
+    },
+
+    map: function <T, E, K>(nr: Async<T, E>, mapper: (toMap: T) => K): Async<K, E> {
+        return NRWrapper.of(nr).map(mapper).unwrap();
+    }
 };
 
 export class NRWrapper<T, E> {
 
-    static of<T, E>(base: NetworkResource<T, E>) {
+    static of<T, E>(base: Async<T, E>) {
         return new NRWrapper(base);
     }
 
-    constructor(private nr: NetworkResource<T, E>) {
+    constructor(private nr: Async<T, E>) {
     }
 
     orElse(def: T): T {
-        if (this.nr.state === 'LOADED') return this.nr.data;
+        if (this.nr.state === 'LOADED') return this.nr.data || def;
         return def;
     }
 
     map<K>(op: (toMap: T) => K): NRWrapper<K, E> {
-        let toRet: NetworkResource<K, E>;
+        let toRet: Async<K, E>;
         switch (this.nr.state) {
             case 'ERROR':
                 toRet = NRHelper.error(this.nr.error);
@@ -84,6 +93,9 @@ export class NRWrapper<T, E> {
         return new NRWrapper<K, E>(toRet);
     }
 
+    unwrap(): Async<T, E> {
+        return this.nr;
+    }
 }
 
 export interface NetworkError {
