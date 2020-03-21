@@ -13,8 +13,9 @@ export class SETService {
                 private type: PersonType,
                 private previous: Egreso[] = []) {
         this.lastId = previous.reduce((pv, cv) => {
-            return pv < cv.id ? pv : cv.id
+            return pv < cv.id ? cv.id : pv
         }, 0);
+        console.log('last id is', this.lastId);
     }
 
     mapToForm(source: Egreso): InvoiceFormData {
@@ -35,8 +36,13 @@ export class SETService {
 
     mapInvoice(source: InvoiceFormData): Egreso {
 
-        const type = EGRESO_STATIC_DATA[this.type].find(el => el.codigo === source.type[0]);
-        if (!type) throw Error(`Type ${source.type[0]} not founs`);
+        const kind = 'Factura';
+
+        const kindData = EGRESO_STATIC_DATA[this.type]
+            .find(el => el.nombre = kind);
+        if (!kindData) throw Error(`King ${kind} not found`);
+        const type = kindData.egresos.find(el => el.codigo === source.type[0]);
+        if (!type) throw Error(`Type ${source.type[0]} not found`);
         const subtype = source.type[1];
 
         return {
@@ -56,7 +62,7 @@ export class SETService {
             tipo: type.codigo,
             tipoEgreso: type.codigo,
             tipoEgresoTexto: type.nombre,
-            tipoTexto: 'Factura'
+            tipoTexto: kind
         }
 
     }

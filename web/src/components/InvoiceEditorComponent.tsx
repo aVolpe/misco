@@ -1,6 +1,6 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Cascader, Col, Form, Input, InputNumber, Row} from 'antd';
-import React, {useState} from 'react';
+import {Button, Cascader, Col, Form, Input, Row} from 'antd';
+import React, {useEffect, useState} from 'react';
 import {Person} from '../RucAPI';
 import {MaskedInput} from 'antd-mask-input';
 import {EGRESO_STATIC_DATA, EGRESO_TYPES} from '../set/ParametroEgreso';
@@ -47,8 +47,13 @@ export function InvoiceForm({
         }
     }
 
+    useEffect(() => {
+        invoice && form.setFieldsValue(invoice);
+    }, [invoice]);
+
     function doIt(data: Store) {
         onSubmit({
+            ...invoice,
             amount: data.amount,
             date: data.date,
             letterhead: data.letterhead,
@@ -65,8 +70,7 @@ export function InvoiceForm({
             <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
                 <MaskedInput mask="11/11/11"
                              placeholder="DD/MM/YY"
-                             defaultValue={invoice?.date}
-                             name="card"/>
+                             defaultValue={invoice?.date}/>
             </Form.Item>
 
             <Form.Item label="Buscar por RUC">
@@ -93,24 +97,21 @@ export function InvoiceForm({
                              placeholder="12345678"/>
             </Form.Item>
 
-            <Form.Item label="Nro Factura" rules={[{required: true}]}>
+            <Form.Item label="Nro Factura" name="invoiceNumber" rules={[{required: true}]}>
                 <MaskedInput mask="111-111-1111111"
                              defaultValue={invoice?.invoiceNumber}
-                             placeholder="001-002-1234567"
-                             name="invoiceNumber"/>
+                             placeholder="001-002-1234567"/>
             </Form.Item>
 
-            <Form.Item label="Monto" rules={[{required: true}]}>
-                <InputNumber placeholder="100000"
-                             defaultValue={invoice?.amount}
-                             style={{width: '100%'}}
-                             name="amount"/>
-                <pre hidden>{JSON.stringify(invoice?.amount, null, 2)}</pre>
+            <Form.Item label="Monto" name="amount" rules={[{required: true}]}>
+                <Input placeholder="100000"
+                       defaultValue={invoice?.amount}
+                       style={{width: '100%'}}
+                />
             </Form.Item>
 
-            <Form.Item label="Tipo egreso">
+            <Form.Item label="Tipo egreso" name="type">
                 <Cascader options={getSelectOptions('FISICO', '1')}
-                          onChange={e => console.log(e)}
                           placeholder="Tipo de egreso"
                           defaultValue={invoice ? invoice.type : ['gasto', 'GPERS']}
                           showSearch={{
@@ -120,8 +121,8 @@ export function InvoiceForm({
                               }
                           }}
                 />
-                <pre hidden>{JSON.stringify(invoice?.type, null, 2)}</pre>
             </Form.Item>
+            <pre hidden>{JSON.stringify(invoice?.type, null, 2)}</pre>
 
             <Form.Item>
                 <Button type="primary" htmlType="submit" style={{width: '50%'}}>Siguiente</Button>
@@ -129,9 +130,6 @@ export function InvoiceForm({
             </Form.Item>
 
         </Form>
-        <br/>
-        {JSON.stringify(finalOwner, null, 2)}
-        <br/>
     </Row>
 }
 

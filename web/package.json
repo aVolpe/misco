@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@rehooks/local-storage": "^2.2.3",
     "antd": "^4.0.2",
     "antd-mask-input": "^0.1.13",
     "lodash": "^4.17.15",
