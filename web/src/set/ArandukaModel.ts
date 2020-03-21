@@ -1,3 +1,5 @@
+import {PersonType} from './ParametroEgreso';
+
 export interface Obligacion {
     impuesto: number;
     nombre: string;
@@ -8,7 +10,7 @@ export interface Informante {
     ruc: string;
     dv: string;
     nombre: string;
-    tipoContribuyente: string;
+    tipoContribuyente: PersonType;
     tipoSociedad?: any;
     nombreFantasia?: any;
     obligaciones: Obligacion[];
@@ -51,6 +53,7 @@ export interface Egreso {
     ruc: string;
     egresoMontoTotal: number;
     relacionadoNombres: string;
+    // RUC emisor
     relacionadoNumeroIdentificacion: string;
     timbradoCondicion: string;
     timbradoDocumento: string;
@@ -73,7 +76,7 @@ export interface Familiar {
     periodo: string;
 }
 
-export interface ArandukaRoot {
+export interface ArandukaExport {
     informante: Informante;
     identificacion: Identificacion;
     ingresos: Ingreso[];

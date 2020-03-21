@@ -2,8 +2,10 @@ import React from 'react';
 import {Button, Row} from 'antd';
 
 
-export function Help(props: { onNewInvoice: () => void }) {
-    return <div>
+export function Help(props: {
+    onNewInvoice: () => void;
+}) {
+    return <div style={{textAlign: 'center'}}>
         <Row>
             Puedes apretar
             <Button title="Agregar" onClick={props.onNewInvoice}>

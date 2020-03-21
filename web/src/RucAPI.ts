@@ -9,7 +9,7 @@ export type QueryResult = Person[];
 
 export function query(searchTerm: string): Promise<QueryResult> {
 
-    const final = searchTerm.replace("\s+", "+");
+    const final = searchTerm.replace(" +", "+");
 
     return fetch(`https://sapi.volpe.com.py/find?query=${final}`)
         .then(result => result.json());
