@@ -10,7 +10,6 @@ import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
 
 export function IncomeListPage(props: {
-    onExport: () => void;
     data: Ingreso[];
     setData: (newData: Ingreso[]) => void;
     owner: Person;

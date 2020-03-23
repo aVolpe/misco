@@ -4,6 +4,7 @@ import {Person, query as QueryRuc} from '../RucAPI';
 import {EGRESO_STATIC_DATA, EGRESO_TYPES, PersonType} from './ParametroEgreso';
 import moment from 'moment';
 import DigitGenerator from './DigitGenerator';
+import { findLast } from 'lodash';
 
 export interface PersonWithLetterhead extends Person {
     letterhead?: string;
@@ -74,7 +75,7 @@ export class SETService {
 
     public async findRuc(query: string): Promise<PersonWithLetterhead> {
 
-        const fromExpenses = this.previous.find(f => query === f.relacionadoNumeroIdentificacion);
+        const fromExpenses = findLast(this.previous, f => query === f.relacionadoNumeroIdentificacion);
 
         if (fromExpenses) {
             return {
@@ -94,6 +95,15 @@ export class SETService {
                 div: '',
                 old: '',
                 doc: ''
+            }
+        }
+        if (!isNaN(Number(query))) {
+            const found = fromApi.find(f => f.doc === query);
+            if (found) {
+                return {
+                    ...found,
+                    letterhead: ''
+                }
             }
         }
         return {

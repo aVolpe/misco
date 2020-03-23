@@ -1,20 +1,37 @@
 import React from 'react';
-import {Button, Row} from 'antd';
+import {AlertTwoTone, WarningTwoTone} from '@ant-design/icons'
+import {Alert, Col, Row} from 'antd';
 
 
 export function Help(props: {
     onNewInvoice: () => void;
 }) {
-    return <div style={{textAlign: 'center'}}>
-        <Row>
-            Puedes apretar
-            <Button title="Agregar" onClick={props.onNewInvoice}>
-                este boton
-            </Button>
-            para agregar una nueva factura
-        </Row>
-        <Row>
-            Las facturas se autocompletan con info de <a href="https://ruc.volpe.com.py">https://ruc.volpe.com.py</a>
-        </Row>
-    </div>
+    return <Row gutter={[8, 8]}>
+        <Col span={24}>
+            <Alert
+                message="Tip"
+                description={<a onClick={props.onNewInvoice}>
+                    Puedes presionar aquí para agregar una
+                    <br/>
+                    nueva factura o presionar <b> Control+n</b>
+                </a>}
+                type="info"
+                showIcon
+                icon={<AlertTwoTone/>}
+            />
+        </Col>
+        <Col span={24}>
+            <Alert
+                message="Atención"
+                description="Este sistema no guarda ningúna informacion, asegurate de exportar tus datos!"
+                type="warning"
+                showIcon
+                icon={<WarningTwoTone twoToneColor="#ebd027"/>}
+            />
+        </Col>
+        <Col span={24}>
+            <Alert message={<div>Las facturas se autocompletan con información de <a
+                href="https://ruc.volpe.com.py">ruc.volpe.com.py</a></div>} type="info"/>
+        </Col>
+    </Row>
 }

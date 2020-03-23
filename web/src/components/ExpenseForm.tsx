@@ -169,7 +169,7 @@ export function ExpenseForm({
                     <pre hidden>{JSON.stringify(expense?.type, null, 2)}</pre>
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" style={{width: '50%'}}>Guardar</Button>
+                        <Button type="primary" htmlType="submit" style={{width: '50%'}}>Guardar (Control+g)</Button>
                         <Button type="default" onClick={onCancel} style={{width: '50%'}}>Cancelar</Button>
                     </Form.Item>
 

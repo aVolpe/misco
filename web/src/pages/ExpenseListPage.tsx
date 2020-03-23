@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, Col, DatePicker, Input, Row, Table} from 'antd';
+import {Button, Col, DatePicker, Input, message, Row, Table} from 'antd';
 import {Async, NRHelper, NRWrapper} from '../Model';
 import {Help} from '../components/Help';
 import {Person} from '../RucAPI';
@@ -58,6 +58,7 @@ export function ExpenseListPage(props: {
     function onSave(d: ExpenseFormData) {
         // it's a save
         if (currentId) {
+            message.info("Registro actualizado", 5);
             props.setData(props.data.map(it => {
                 return it.id === currentId ? service.mapInvoice(d, currentId) : it;
             }));
@@ -65,6 +66,7 @@ export function ExpenseListPage(props: {
             setCurrent(undefined);
         } else {
             // it's a new
+            message.info(`Factura ${d.expenseNumber} guardada`, 5);
             props.setData([...props.data, service.mapInvoice(d)]);
             onNewExpense();
         }

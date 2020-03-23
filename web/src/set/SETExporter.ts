@@ -36,4 +36,8 @@ export class SETExporter {
         return toRet;
 
     }
+
+    downloadExcel(toDownload: any[]) {
+
+    }
 }
