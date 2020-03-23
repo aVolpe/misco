@@ -7,12 +7,14 @@ import {SETService} from './SETService';
 
 export class SETExporter {
 
-    downloadData(data: ArandukaExport) {
+    downloadData(data: ArandukaExport, nameFormat: 'FULL'|'SIMPLE') {
 
         const fixed = this.fixDataTypes(data);
         const type = 'json';
         const now = moment().format('YYYYMMDDhhmm');
-        const name = `${data.informante.ruc}_${data.identificacion.periodo}_${data.identificacion.tipoPresentacion}_${now}.${type}`;
+        const period = nameFormat === 'FULL' ? `${data.identificacion.periodo}_` : '';
+        const pType = nameFormat === 'FULL' ? `${data.identificacion.tipoPresentacion}_` : '';
+        const name = `${data.informante.ruc}_${period}${pType}${now}.${type}`;
         const ct = 'application/json';
         download(new Blob([JSON.stringify(fixed, null, 2)]), name, ct);
     }
@@ -91,7 +93,7 @@ export class SETExporter {
             },
             ingresos: incomes,
             egresos: expenses
-        })
+        }, 'FULL')
     }
 }
 

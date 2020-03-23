@@ -23,7 +23,7 @@ export function Exporter() {
                 identificacion: identity!,
                 informante: informer!,
                 egresos: expenses!
-            })
+            }, 'SIMPLE')
     }
 
     function downloadPeriod(period: number, type: PresentationType) {
