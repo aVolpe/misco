@@ -17,10 +17,12 @@ export interface Informante {
     clasificacion: string;
 }
 
+export type PresentationType = 'ORIGINAL'|'RECTIFICATIVA';
+
 export interface Identificacion {
     periodo: string;
     tipoMovimiento: string;
-    tipoPresentacion: string;
+    tipoPresentacion: PresentationType;
     version: string;
 }
 

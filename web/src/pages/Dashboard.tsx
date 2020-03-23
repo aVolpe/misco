@@ -3,7 +3,7 @@ import {Egreso, Familiar, Identificacion, Informante, Ingreso} from '../set/Aran
 import {EXAMPLE_DATA} from '../set/ExampleData';
 import {Person} from '../RucAPI';
 import React, {useMemo, useState} from 'react';
-import {Button, Drawer, Modal, PageHeader, Tabs} from 'antd';
+import {Button, Drawer, message, Modal, PageHeader, Tabs} from 'antd';
 import {ExpenseListPage} from './ExpenseListPage';
 import {IncomeListPage} from './IncomeListPage';
 import {Informer} from '../components/Informer';
@@ -15,9 +15,9 @@ export function Dashboard() {
     const [incomes, setIncomes, clearIncomes] = useLocalStorage<Ingreso[]>('ingresos', []);
     const [expenses, setExpenses, clearExpenses] = useLocalStorage<Egreso[]>('egresos', []);
     const [identity, setIdentity, clearIdentity] = useLocalStorage<Identificacion>('identificacion', EXAMPLE_DATA.identificacion);
-    const [family, setFamily, clearFamily] = useLocalStorage<Familiar[]>('identificacion', []);
+    const [family, setFamily, clearFamily] = useLocalStorage<Familiar[]>('familia', []);
 
-    const [showExporter, setShowExporter] = useState(true);
+    const [showExporter, setShowExporter] = useState(false);
 
     const owner: Person = useMemo(() => ({
         doc: informer?.ruc || '',
@@ -43,6 +43,7 @@ export function Dashboard() {
                 clearExpenses();
                 clearIncomes();
                 clearInformer();
+                message.warning('Todos los datos han sido borrados', 10);
             }
         })
     }
@@ -74,7 +75,7 @@ export function Dashboard() {
                                             period={period}
                             />
                         </Tabs.TabPane>
-                        <Tabs.TabPane tab="Familiares" key="2">
+                        <Tabs.TabPane tab="Familiares" key="3">
                             <pre>{JSON.stringify(family, null, 2)}</pre>
                         </Tabs.TabPane>
                     </Tabs>}
@@ -85,7 +86,7 @@ export function Dashboard() {
             onClose={() => setShowExporter(false)}
             visible={showExporter}
             bodyStyle={{paddingBottom: 80}}
-            footer={<div style={{textAlign: 'right',}}>
+            footer={<div style={{textAlign: 'right'}}>
                 <Button onClick={() => setShowExporter(false)} style={{marginRight: 8}}> Volper </Button>
             </div>}>
             <Exporter/>

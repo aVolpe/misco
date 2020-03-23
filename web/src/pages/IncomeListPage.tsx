@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, DatePicker, Input, Row, Table} from 'antd';
+import {Button, Col, DatePicker, Input, Row, Table, Typography} from 'antd';
 import {Person} from '../RucAPI';
 import {Ingreso} from '../set/ArandukaModel';
 import {formatMoney} from '../utils/formatters';
-import {SETService} from '../set/SETService';
 import {PersonType} from '../set/ParametroEgreso';
 import {useDebounce} from '../utils/Hooks';
 import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
+import {sumBy} from 'lodash';
 
 export function IncomeListPage(props: {
     data: Ingreso[];
@@ -116,6 +116,17 @@ function IncomeTable(props: {
             }
 
         ]}
+        summary={pageData => {
+            const sum = sumBy(pageData, 'ingresoMontoTotal');
+            return <tr>
+                <th>Total</th>
+                <td colSpan={3}/>
+                <td className="ant-table-cell" style={{textAlign: 'right', padding: 8}}>
+                    <Typography.Text>{formatMoney(sum)}</Typography.Text>
+                </td>
+                <td/>
+            </tr>
+        }}
     />
 
 }

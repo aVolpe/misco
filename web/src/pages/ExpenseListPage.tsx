@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, Col, DatePicker, Input, message, Row, Table} from 'antd';
+import {Button, Col, DatePicker, Input, message, Row, Table, Typography} from 'antd';
 import {Async, NRHelper, NRWrapper} from '../Model';
 import {Help} from '../components/Help';
 import {Person} from '../RucAPI';
@@ -12,6 +12,7 @@ import {PersonType} from '../set/ParametroEgreso';
 import {useDebounce} from '../utils/Hooks';
 import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
+import {sumBy} from 'lodash';
 
 const emptyOwner: Person = {old: '', div: '', name: '', doc: ''};
 
@@ -234,6 +235,18 @@ function InvoiceTable(props: {
             }
 
         ]}
+
+        summary={() => {
+            const sum = sumBy(props.invoices, 'egresoMontoTotal');
+            return <tr>
+                <th colSpan={3}>Total (todas las filas)</th>
+                <td colSpan={2}/>
+                <td className="ant-table-cell" style={{textAlign: 'right', padding: 8}}>
+                    <Typography.Text>{formatMoney(sum)}</Typography.Text>
+                </td>
+                <td/>
+            </tr>
+        }}
     />
 
 }
