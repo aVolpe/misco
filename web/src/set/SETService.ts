@@ -124,4 +124,8 @@ export class SETService {
         return moment(source, "YYYY-MM-DD");
     }
 
+    public static mapMomentToSETFormat(source: moment.Moment): string {
+        return source.format('YYYY-MM-DD')
+    }
+
 }

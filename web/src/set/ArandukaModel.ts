@@ -11,8 +11,8 @@ export interface Informante {
     dv: string;
     nombre: string;
     tipoContribuyente: PersonType;
-    tipoSociedad?: any;
-    nombreFantasia?: any;
+    tipoSociedad?: string | null;
+    nombreFantasia?: string | null;
     obligaciones: Obligacion[];
     clasificacion: string;
 }
@@ -31,6 +31,7 @@ export interface Ingreso {
     periodo: string;
     tipoTexto: string;
     fecha: string;
+    mes?: string;
     ruc: string;
     tipoIngreso: string;
     tipoIngresoTexto: string;

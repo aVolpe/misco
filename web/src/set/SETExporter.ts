@@ -7,7 +7,7 @@ import {SETService} from './SETService';
 
 export class SETExporter {
 
-    downloadData(data: ArandukaExport, nameFormat: 'FULL'|'SIMPLE') {
+    downloadData(data: ArandukaExport, nameFormat: 'FULL' | 'SIMPLE') {
 
         const fixed = this.fixDataTypes(data);
         const type = 'json';

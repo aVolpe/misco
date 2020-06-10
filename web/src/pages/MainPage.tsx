@@ -6,7 +6,7 @@ import {Onboarding} from './Onboarding';
 
 export function MainPage() {
 
-    const [informer, setInformer] = useLocalStorage<Informante>('informante');
+    const [informer] = useLocalStorage<Informante>('informante');
 
     return informer ? <Dashboard/> : <Onboarding/>
 }

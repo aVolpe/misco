@@ -1,8 +1,8 @@
 import {Egreso, Ingreso} from './ArandukaModel';
-import * as moment from 'moment';
+import moment from 'moment';
 import {SETService} from './SETService';
 
-type Filtrable = Pick<Ingreso, 'relacionadoNombres' | 'relacionadoNumeroIdentificacion' | 'timbradoDocumento' | 'fecha'>;
+type Filtrable = Pick<Egreso, 'relacionadoNombres' | 'relacionadoNumeroIdentificacion' | 'timbradoDocumento' | 'fecha'>;
 
 export class SETListManipulatorService {
 

@@ -33,7 +33,7 @@ export function IncomeListPage(props: {
         <Col span={18}>
             <Row gutter={[8, 8]} align="middle">
                 <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}} offset={1}>
-                    Busqueda:
+                    Búsqueda:
                 </Col>
                 <Col span={9}>
                     <Input placeholder="Por ruc/nombre/nro factura"
@@ -130,3 +130,4 @@ function IncomeTable(props: {
     />
 
 }
+

@@ -199,10 +199,20 @@ function InvoiceTable(props: {
                 sorter: (a, b) => a.id - b.id,
             },
             {
-                title: 'Credito/contado',
+                title: 'Detalles',
                 dataIndex: 'timbradoCondicion',
                 align: 'right',
+                render: (_, row) => <>
+                    {row.tipoEgreso}/{row.subtipoEgreso}
+                    <br/>
+                    <small>{row.timbradoCondicion}</small>
+                </>,
                 sorter: (a, b) => a.timbradoCondicion.localeCompare(b.timbradoCondicion),
+            },
+            {
+                title: 'Fecha',
+                dataIndex: 'fecha',
+                sorter: (a, b) => a.fecha.localeCompare(b.fecha),
             },
             {
                 title: 'Emisor',
@@ -214,11 +224,6 @@ function InvoiceTable(props: {
                 </>
             },
             {title: 'Factura', dataIndex: 'timbradoDocumento', align: 'right'},
-            {
-                title: 'Fecha',
-                dataIndex: 'fecha',
-                sorter: (a, b) => a.fecha.localeCompare(b.fecha),
-            },
             {
                 title: 'Monto',
                 align: 'right',

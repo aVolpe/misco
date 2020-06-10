@@ -26,8 +26,9 @@ export function Dashboard() {
         name: informer?.nombre || ''
     }), [informer]);
 
-    const period: number = useMemo(() => Number(identity?.periodo) || new Date().getFullYear(), [identity]);
-
+    const period: number = identity && identity.periodo
+        ? parseInt(identity.periodo)
+        : new Date().getFullYear();
 
     function logout() {
         Modal.warning({
