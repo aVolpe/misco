@@ -2,7 +2,7 @@ import {Egreso, Ingreso} from './ArandukaModel';
 import moment from 'moment';
 import {SETService} from './SETService';
 
-type Filtrable = Pick<Egreso, 'relacionadoNombres' | 'relacionadoNumeroIdentificacion' | 'timbradoDocumento' | 'fecha'>;
+type Filtrable = Pick<Ingreso, 'relacionadoNombres' | 'relacionadoNumeroIdentificacion' | 'timbradoDocumento' | 'fecha'>;
 
 export class SETListManipulatorService {
 
@@ -13,9 +13,9 @@ export class SETListManipulatorService {
             if (toSearch)
                 valid = tf.relacionadoNombres.toLowerCase().includes(toSearch)
                     || tf.relacionadoNumeroIdentificacion.toLowerCase().includes(toSearch)
-                    || tf.timbradoDocumento.toLowerCase().includes(toSearch);
+                    || (tf.timbradoDocumento || '').toLowerCase().includes(toSearch);
             if (valid) {
-                valid = SETService.mapSETFormatToMoment(tf.fecha).isBetween(from, to);
+                valid = SETService.mapSETFormatToMoment(tf.fecha).isBetween(from, to, undefined, "[]");
             }
             return valid
         })

@@ -24,8 +24,6 @@ export class SETImporter {
                     newFecha = SETService.mapMomentToSETFormat(moment("1990-01-01")
                         .month(parseInt(ingreso.mes) - 1)
                         .year(parseInt(ingreso.periodo)));
-                    (window as any).moment = moment;
-                    console.log(`Ingreso inválido, verificar ${ingreso.id} con fecha ${ingreso.fecha} mes ${ingreso.mes} ${ingreso.periodo}`)
                 } else {
                     throw new Error(`Ingreso inválido, verificar ${ingreso.id} con fecha ${ingreso.fecha} mes ${ingreso.mes}`);
                 }

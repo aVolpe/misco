@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, Col, DatePicker, Input, message, Row, Table, Typography} from 'antd';
+import {Button, Col, DatePicker, Input, message, Popover, Row, Table, Typography} from 'antd';
 import {Async, NRHelper, NRWrapper} from '../Model';
 import {Help} from '../components/Help';
 import {Person} from '../RucAPI';
@@ -14,13 +14,13 @@ import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
 import {sumBy} from 'lodash';
 
-const emptyOwner: Person = {old: '', div: '', name: '', doc: ''};
+export const emptyOwner: Person = {old: '', div: '', name: '', doc: ''};
 
 const defaultExpense: ExpenseFormData = {
     date: '',
     letterhead: '',
     expenseNumber: '',
-    type: ['gasto', 'GPERS'],
+    type: ['1', 'gasto', 'GPERS'],
     owner: emptyOwner,
     amount: 0,
     isCredit: false
@@ -132,7 +132,7 @@ export function ExpenseListPage(props: {
                                      onCancel={() => setCurrent(undefined)}
                                      editType={currentId ? 'EDIT' : 'NEW'}
                                      onSave={onSave}/>
-                    : <Help onNewInvoice={onNewExpense}/>
+                    : <Help onNewInvoice={onNewExpense} type="invoice"/>
                 }
             </Col>
         </Row>
@@ -191,55 +191,58 @@ function InvoiceTable(props: {
         }}
         rowKey="id"
         style={{width: '100%'}}
-        columns={[
-            {
-                title: 'ID',
-                dataIndex: 'id',
-                defaultSortOrder: 'descend',
-                sorter: (a, b) => a.id - b.id,
-            },
-            {
-                title: 'Detalles',
-                dataIndex: 'timbradoCondicion',
-                align: 'right',
-                render: (_, row) => <>
-                    {row.tipoEgreso}/{row.subtipoEgreso}
-                    <br/>
-                    <small>{row.timbradoCondicion}</small>
-                </>,
-                sorter: (a, b) => a.timbradoCondicion.localeCompare(b.timbradoCondicion),
-            },
-            {
-                title: 'Fecha',
-                dataIndex: 'fecha',
-                sorter: (a, b) => a.fecha.localeCompare(b.fecha),
-            },
-            {
-                title: 'Emisor',
-                dataIndex: 'relacionadoNumeroIdentificacion',
-                align: 'right',
-                sorter: (a, b) => a.relacionadoNombres.localeCompare(b.relacionadoNombres),
-                render: (_, row) => <>
-                    {row.relacionadoNombres} ({row.relacionadoNumeroIdentificacion})
+        columns={[{
+            title: 'ID',
+            dataIndex: 'id',
+            defaultSortOrder: 'descend',
+            sorter: (a, b) => a.id - b.id,
+        }, {
+            title: 'Detalles',
+            dataIndex: 'timbradoCondicion',
+            align: 'right',
+            render: (_, row) => <>
+                <Popover content={`${row.tipoTexto}/${row.tipoEgresoTexto}/${row.subtipoEgresoTexto}`}
+                         title={`${row.tipoTexto}/${row.tipoEgresoTexto}/${row.subtipoEgresoTexto}`}>
+                    <span>{row.tipo}/{row.tipoEgreso}/{row.subtipoEgreso}</span>
+                </Popover>
+                {row.timbradoCondicion && <><br/> <small>{row.timbradoCondicion}</small></>}
+            </>,
+            sorter: (a, b) => `${a.tipo}/${a.tipoEgreso}/${a.subtipoEgreso}`
+                .localeCompare(`${b.tipo}/${b.tipoEgreso}/${b.subtipoEgreso}`),
+        }, {
+            title: 'Fecha',
+            dataIndex: 'fecha',
+            sorter: (a, b) => a.fecha.localeCompare(b.fecha),
+        }, {
+            title: 'Emisor',
+            dataIndex: 'relacionadoNumeroIdentificacion',
+            align: 'left',
+            sorter: (a, b) => a.relacionadoNombres.localeCompare(b.relacionadoNombres),
+            render: (_, row) => <>
+                {row.relacionadoNombres} ({row.relacionadoNumeroIdentificacion})
+            </>
+        }, {
+            title: 'Factura',
+            dataIndex: 'timbradoDocumento',
+            align: 'right',
+            render: (_, row) => <>
+                {row.timbradoDocumento}
+                <br/><small>{row.timbradoNumero}</small>
+            </>
+        }, {
+            title: 'Monto',
+            align: 'right',
+            dataIndex: 'egresoMontoTotal',
+            render: (a: number) => formatMoney(a),
+            sorter: (a, b) => a.egresoMontoTotal - b.egresoMontoTotal,
+        }, {
+            title: 'Acciones', dataIndex: '', render: (_, row) => {
+                return <>
+                    <Button onClick={() => props.onEdit(row)}>Editar</Button>
+                    <Button type="danger" onClick={() => props.onRemove(row)}>Eliminar</Button>
                 </>
-            },
-            {title: 'Factura', dataIndex: 'timbradoDocumento', align: 'right'},
-            {
-                title: 'Monto',
-                align: 'right',
-                dataIndex: 'egresoMontoTotal',
-                render: (a: number) => formatMoney(a),
-                sorter: (a, b) => a.egresoMontoTotal - b.egresoMontoTotal,
-            }, {
-                title: 'Acciones', dataIndex: '', render: (_, row) => {
-                    return <>
-                        <Button onClick={() => props.onEdit(row)}>Editar</Button>
-                        <Button type="danger" onClick={() => props.onRemove(row)}>Eliminar</Button>
-                    </>
-                }
             }
-
-        ]}
+        }]}
 
         summary={() => {
             const sum = sumBy(props.invoices, 'egresoMontoTotal');

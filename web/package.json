@@ -36,6 +36,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build-stats": "react-scripts build --stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O"
+,
+    "to-prod": "scp -r ./build/* volpe:services/data/files/misco"
   },
   "eslintConfig": {
     "extends": "react-app"

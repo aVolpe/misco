@@ -1,41 +1,42 @@
 import {Async, NRWrapper} from '../Model';
 import {Button, Cascader, Col, Form, Input, InputNumber, Radio, Row} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
-import {EGRESO_STATIC_DATA, EGRESO_TYPES} from '../set/ParametroEgreso';
 import {CascaderOptionType} from 'antd/lib/cascader';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
 import MaskedInput from 'antd-mask-input/build/main/lib/MaskedInput';
 import {PersonWithLetterhead} from '../set/SETService';
+import {INGRESO_STATIC_DATA, INGRESO_TYPES} from '../set/ParametroIngreso';
+import {PersonType} from '../set/ParametroEgreso';
 
-export interface ExpenseFormProps {
-    expense?: ExpenseFormData,
+export interface IncomeFormProps {
+    income?: IncomeFormData,
     owner: Async<PersonWithLetterhead>
     onNewRuc: (ruc: string) => void;
-    onSubmit: (data: ExpenseFormData) => void;
+    onSubmit: (data: IncomeFormData) => void;
     onCancel: () => void;
     editType: 'NEW' | 'EDIT';
 }
 
-export interface ExpenseFormData {
+export interface IncomeFormData {
     owner: PersonWithLetterhead;
     date: string;
     letterhead?: string;
-    expenseNumber?: string;
-    type: [string, string, string];
+    incomeNumber?: string;
+    type: [string, string];
     amount: number;
     isCredit: boolean;
 }
 
-export function ExpenseForm({
-                                expense,
-                                owner,
-                                onNewRuc,
-                                onSubmit,
-                                onCancel,
-                                editType
-                            }: ExpenseFormProps) {
+export function IncomeForm({
+                               income,
+                               owner,
+                               onNewRuc,
+                               onSubmit,
+                               onCancel,
+                               editType
+                           }: IncomeFormProps) {
 
     const finalOwner = NRWrapper.of(owner).orElse({
         doc: '',
@@ -55,10 +56,10 @@ export function ExpenseForm({
     }
 
     useEffect(() => {
-        if (!expense) return;
-        form.setFieldsValue(expense);
-        if (refQuery.current) refQuery.current.setValue(expense.owner.doc);
-    }, [form, expense]);
+        if (!income) return;
+        form.setFieldsValue(income);
+        if (refQuery.current) refQuery.current.setValue(income.owner.doc);
+    }, [form, income]);
 
     const newLetterHead = NRWrapper.of(owner).map(o => o.letterhead).orElse('');
     useEffect(() => {
@@ -71,11 +72,11 @@ export function ExpenseForm({
 
     function doIt(data: Store) {
         onSubmit({
-            ...expense,
+            ...income,
             amount: Number(data.amount),
             date: data.date,
             letterhead: data.letterhead,
-            expenseNumber: data.expenseNumber,
+            incomeNumber: data.incomeNumber,
             owner: finalOwner,
             type: data.type,
             isCredit: data.isCredit
@@ -88,14 +89,14 @@ export function ExpenseForm({
 
     return <GlobalHotKeys
         keyMap={{
-            SAVE_EXPENSE: ["Control+g"]
+            SAVE_Income: ["Control+g"]
         }}
         handlers={{
-            SAVE_EXPENSE: form.submit
+            SAVE_Income: form.submit
         }}>
         <Row gutter={16} style={{padding: 8}}>
             <Col span={24}>
-                <h1>{editType === 'EDIT' ? 'Editando' : 'Creando'}</h1>
+                <h1>{editType === 'EDIT' ? 'Editando' : 'Nuevo ingreso'}</h1>
             </Col>
             <Col span={24}>
                 <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}}>
@@ -105,13 +106,13 @@ export function ExpenseForm({
                                      ref={refDate}
                                      autoFocus
                                      placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
-                                     defaultValue={expense?.date}/>
+                                     defaultValue={income?.date}/>
                     </Form.Item>
 
-                    <Form.Item label="Tipo egreso" name="type">
+                    <Form.Item label="Tipo ingreso" name="type">
                         <Cascader options={getSelectOptions('FISICO')}
                                   placeholder="Tipo de egreso"
-                                  defaultValue={expense ? expense.type : ['1', 'gasto', 'GPERS']}
+                                  defaultValue={income ? income.type : ['1', 'REMDEP']}
                                   showSearch={{
                                       filter: (inputValue, path) => {
                                           return path.some(option => (option.label! as string)
@@ -125,7 +126,7 @@ export function ExpenseForm({
                         <Input placeholder="4787587, Arturo Volpe, ASISMED"
                                onKeyDown={evt => onRucInput(evt.key)}
                                ref={refQuery}
-                               defaultValue={expense?.owner.doc}
+                               defaultValue={income?.owner.doc}
                                onBlur={evt => {
                                    setRucQuery(evt.target.value);
                                    onNewRuc(evt.target.value);
@@ -141,26 +142,24 @@ export function ExpenseForm({
                     <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.type !== curValues.type}>
                         {data => {
                             const type = data.getFieldValue("type") || [];
-                            if (
-                                type[0] === "5" && type[1] === 'gasto' && type[2] === 'DESCJBPN'
-                            ) return null
+                            if (type[0] === "5") return null
                             return <>
                                 <Form.Item name="letterhead"
                                            label="Timbrado"
                                            rules={[{required: true}]}>
                                     <MaskedInput mask="11111111"
-                                                 defaultValue={expense?.letterhead}
+                                                 defaultValue={income?.letterhead}
                                                  placeholder="12345678"/>
                                 </Form.Item>
 
-                                <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
+                                <Form.Item label="Nro Factura" name="incomeNumber" rules={[{required: true}]}>
                                     <MaskedInput mask="111-111-1111111"
-                                                 defaultValue={expense?.expenseNumber}
+                                                 defaultValue={income?.incomeNumber}
                                                  placeholder="001-002-1234567"/>
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">
-                                    <Radio.Group defaultValue={expense?.isCredit}>
+                                    <Radio.Group defaultValue={false}>
                                         <Radio.Button value={true}>CRÉDITO</Radio.Button>
                                         <Radio.Button value={false}>CONTADO</Radio.Button>
                                     </Radio.Group>
@@ -169,8 +168,9 @@ export function ExpenseForm({
                         }}
                     </Form.Item>
 
+
                     <Form.Item label="Monto" name="amount" rules={[{required: true}]}>
-                        <InputNumber defaultValue={expense?.amount}
+                        <InputNumber defaultValue={income?.amount}
                                      style={{width: '100%'}}
                                      formatter={formatMoney}
                                      parser={parseMoney}
@@ -178,7 +178,7 @@ export function ExpenseForm({
                     </Form.Item>
 
 
-                    <pre hidden>{JSON.stringify(expense?.type, null, 2)}</pre>
+                    <pre hidden>{JSON.stringify(income?.type, null, 2)}</pre>
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit" style={{width: '50%'}}>Guardar (Control+g)</Button>
@@ -191,23 +191,17 @@ export function ExpenseForm({
     </GlobalHotKeys>;
 }
 
-function getSelectOptions(type: 'FISICO' | 'SOCIEDAD_SIMPLE'): CascaderOptionType[] {
-    const root = EGRESO_STATIC_DATA[type];
+function getSelectOptions(type: PersonType): CascaderOptionType[] {
+    const root = INGRESO_STATIC_DATA[type];
     if (!root) return [];
     return root.map(e => {
         return {
             value: e.codigo,
             label: e.nombre,
-            children: e.egresos.map(te => {
-                return {
-                    value: te.codigo,
-                    label: te.nombre,
-                    children: te.subtipos.map(stp => ({
-                        value: stp,
-                        label: EGRESO_TYPES[stp]
-                    }))
-                }
-            })
+            children: e.opciones.map(stp => ({
+                value: stp,
+                label: INGRESO_TYPES[stp]
+            }))
         }
     })
 }

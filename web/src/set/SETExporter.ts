@@ -27,18 +27,37 @@ export class SETExporter {
             i.ingresoMontoGravado = Number(i.ingresoMontoGravado);
             i.ingresoMontoNoGravado = Number(i.ingresoMontoNoGravado);
             i.ingresoMontoTotal = Number(i.ingresoMontoTotal);
-            i.periodo = SETService.mapSETFormatToMoment(i.fecha).year() + '';
+            if (i.fecha)
+                i.periodo = SETService.mapSETFormatToMoment(i.fecha).year() + '';
+
+            if (i.tipo === "5") {
+                i.mes = `${SETService.mapSETFormatToSetMonth(i.fecha)}`;
+                delete i.fecha;
+                delete i.timbradoDocumento;
+                delete i.timbradoCondicion;
+                delete i.timbradoNumero;
+            }
         });
 
-        toRet.egresos.forEach(i => {
-            i.egresoMontoTotal = Number(i.egresoMontoTotal);
+        toRet.egresos.forEach(e => {
+            e.egresoMontoTotal = Number(e.egresoMontoTotal);
 
             // Fix all expenses where of type 'gasto' instead of the correct kind
-            if (i.tipo === "gasto") {
-                i.tipo = "1"
+            if (e.tipo === "gasto") {
+                e.tipo = "1"
             }
 
-            i.periodo = SETService.mapSETFormatToMoment(i.fecha).year() + '';
+            e.periodo = SETService.mapSETFormatToMoment(e.fecha).year() + '';
+
+            if (
+                e.tipo === "5" && e.tipoEgreso === 'gasto' && e.subtipoEgreso === 'DESCJBPN'
+            ) {
+                e.mes = `${SETService.mapSETFormatToSetMonth(e.fecha)}`;
+                // delete e.fecha;
+                delete e.timbradoDocumento;
+                delete e.timbradoCondicion;
+                delete e.timbradoNumero;
+            }
         });
 
         return toRet;

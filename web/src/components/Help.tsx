@@ -5,15 +5,16 @@ import {Alert, Col, Row} from 'antd';
 
 export function Help(props: {
     onNewInvoice: () => void;
+    type: 'income' | 'invoice'
 }) {
     return <Row gutter={[8, 8]}>
         <Col span={24}>
             <Alert
                 message="Tip"
                 description={<a onClick={props.onNewInvoice}>
-                    Puedes presionar aquí para agregar una
+                    Puedes presionar aquí para agregar
                     <br/>
-                    nueva factura o presionar <b> Control+n</b>
+                    {props.type === 'income' ? 'un nuevo ingreso' : 'una nueva factura'} o presiona <b> Control+n</b>
                 </a>}
                 type="info"
                 showIcon

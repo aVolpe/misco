@@ -39,9 +39,9 @@ export interface Ingreso {
     ingresoMontoGravado: number;
     ingresoMontoNoGravado: number;
     ingresoMontoTotal: number;
-    timbradoCondicion: string;
-    timbradoDocumento: string;
-    timbradoNumero: string;
+    timbradoCondicion?: string;
+    timbradoDocumento?: string;
+    timbradoNumero?: string;
     relacionadoTipoIdentificacion: string;
     relacionadoNumeroIdentificacion: string;
     relacionadoNombres: string;
@@ -58,14 +58,15 @@ export interface Egreso {
     relacionadoNombres: string;
     // RUC emisor
     relacionadoNumeroIdentificacion: string;
-    timbradoCondicion: string;
-    timbradoDocumento: string;
-    timbradoNumero: string;
+    timbradoCondicion?: string;
+    timbradoDocumento?: string;
+    timbradoNumero?: string;
     tipoEgreso: string;
     tipoEgresoTexto: string;
     tipoTexto: string;
     subtipoEgreso: string;
     subtipoEgresoTexto: string;
+    mes?: string;
 }
 
 export interface Familiar {
