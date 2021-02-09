@@ -11,11 +11,11 @@ export function Help(props: {
         <Col span={24}>
             <Alert
                 message="Tip"
-                description={<a onClick={props.onNewInvoice}>
+                description={<div onClick={props.onNewInvoice}>
                     Puedes presionar aquí para agregar
                     <br/>
                     {props.type === 'income' ? 'un nuevo ingreso' : 'una nueva factura'} o presiona <b> Control+n</b>
-                </a>}
+                </div>}
                 type="info"
                 showIcon
                 icon={<AlertTwoTone/>}

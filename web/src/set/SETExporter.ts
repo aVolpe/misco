@@ -2,7 +2,6 @@ import {ArandukaExport, Egreso, Familiar, Identificacion, Informante, Ingreso, P
 import moment from 'moment';
 import download from 'downloadjs';
 import Papa from 'papaparse';
-import {SETListManipulatorService} from './SETListManipulatorService';
 import {SETService} from './SETService';
 
 export class SETExporter {
@@ -92,30 +91,7 @@ export class SETExporter {
         informante: Informante
     }, period: number, type: PresentationType) {
 
-        const filterer = new SETListManipulatorService();
-
-        const from = moment(`${period}-01-01`);
-        const to = moment(`${period}-12-31`);
-
-        const incomes = filterer.filterIncomes(clone(data.ingresos), undefined, from, to);
-        const expenses = filterer.filterExpenses(clone(data.egresos), undefined, from, to);
-
-
-        this.downloadData({
-            familiares: data.familiares,
-            informante: data.informante,
-            identificacion: {
-                version: '1.0.3',
-                periodo: `${period}`,
-                tipoPresentacion: type,
-                tipoMovimiento: (incomes.length + expenses.length) > 0 ? 'CON_MOVIMIENTO' : 'SIN_MOVIMIENTO'
-            },
-            ingresos: incomes,
-            egresos: expenses
-        }, 'FULL')
+        alert("TODO: Not implemented")
     }
 }
 
-function clone<T>(data: T[]): T[] {
-    return JSON.parse(JSON.stringify(data));
-}

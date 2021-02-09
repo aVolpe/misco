@@ -1,34 +1,64 @@
 import {useLocalStorage} from '@rehooks/local-storage';
-import {Egreso, Familiar, Identificacion, Informante, Ingreso} from '../set/ArandukaModel';
-import {EXAMPLE_DATA} from '../set/ExampleData';
 import {Person} from '../RucAPI';
-import React, {useMemo, useState} from 'react';
-import {Button, Drawer, message, Modal, PageHeader, Tabs} from 'antd';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Button, Drawer, message, Modal, PageHeader, Result, Tabs} from 'antd';
 import {ExpenseListPage} from './ExpenseListPage';
 import {IncomeListPage} from './IncomeListPage';
 import {Informer} from '../components/Informer';
 import {Exporter} from './Exporter';
+import {VersionMigrator} from "../set/VersionMigrator";
+import {Expense, Income, User} from "../set/Model";
+
+const vm = new VersionMigrator();
 
 export function Dashboard() {
 
-    const [informer, setInformer, clearInformer] = useLocalStorage<Informante>('informante', EXAMPLE_DATA.informante);
-    const [incomes, setIncomes, clearIncomes] = useLocalStorage<Ingreso[]>('ingresos', []);
-    const [expenses, setExpenses, clearExpenses] = useLocalStorage<Egreso[]>('egresos', []);
-    const [identity, setIdentity, clearIdentity] = useLocalStorage<Identificacion>('identificacion', EXAMPLE_DATA.identificacion);
-    const [family, setFamily, clearFamily] = useLocalStorage<Familiar[]>('familia', []);
+    const [informer, setInformer, clearInformer] = useLocalStorage<User>('informante');
+    const [incomes, setIncomes, clearIncomes] = useLocalStorage<Income[]>('ingresos', []);
+    const [expenses, setExpenses, clearExpenses] = useLocalStorage<Expense[]>('egresos', []);
+    const [migration, setMigration] = useState<boolean>(true);
+
+    // this effect will update all data
+    useEffect(() => {
+        // if we don't have data, then continue
+        if (!informer && (!incomes || incomes.length === 0) && (!expenses || expenses.length === 0)) {
+            setMigration(false);
+            return;
+        }
+
+        // if we have data, check
+        if (
+            (informer && !vm.needsMigration(informer))
+            && (incomes && !vm.anyNeedsMigration(incomes))
+            && (expenses && !vm.anyNeedsMigration(expenses))
+        ) {
+            setMigration(false);
+            return;
+        }
+
+        console.log(informer, incomes, expenses);
+        console.log(vm.needsMigration(informer), vm.anyNeedsMigration(incomes || []), vm.anyNeedsMigration(expenses || []));
+        setMigration(true);
+
+        setTimeout(() => {
+            if (informer && vm.needsMigration(informer)) setInformer(vm.migrateUser(informer));
+            if (incomes && vm.anyNeedsMigration(incomes)) setIncomes(incomes.map(vm.migrateIncome));
+            if (expenses && vm.anyNeedsMigration(expenses)) setExpenses(expenses.map(vm.migrateExpense));
+            setMigration(false);
+        });
+
+    }, [migration, informer, incomes, expenses, setIncomes, setInformer, setExpenses])
 
     const [showExporter, setShowExporter] = useState(false);
 
     const owner: Person = useMemo(() => ({
-        doc: informer?.ruc || '',
+        doc: informer?.identifier || '',
         old: '',
-        div: informer?.dv || '',
-        name: informer?.nombre || ''
+        div: '',
+        name: informer?.name || ''
     }), [informer]);
 
-    const period: number = identity && identity.periodo
-        ? parseInt(identity.periodo)
-        : new Date().getFullYear();
+    const period: number = new Date().getFullYear();
 
     function logout() {
         Modal.warning({
@@ -39,8 +69,6 @@ export function Dashboard() {
             okText: 'Sí, cerrar y borrar datos',
             okType: 'danger',
             onOk: () => {
-                clearFamily();
-                clearIdentity();
                 clearExpenses();
                 clearIncomes();
                 clearInformer();
@@ -49,6 +77,11 @@ export function Dashboard() {
         })
     }
 
+    if (migration) {
+        return <Result title="Cargando">
+            Migrando datos a versión actual, por favor espere...
+        </Result>
+    }
 
     return <>
         <PageHeader ghost={false}
@@ -63,7 +96,7 @@ export function Dashboard() {
                         <Tabs.TabPane tab="Egresos" key="1">
                             <ExpenseListPage data={expenses!}
                                              setData={setExpenses}
-                                             type={informer!.tipoContribuyente}
+                                             type={informer!.type}
                                              owner={owner}
                                              period={period}
                             />
@@ -71,13 +104,10 @@ export function Dashboard() {
                         <Tabs.TabPane tab="Ingresos" key="2">
                             <IncomeListPage data={incomes!}
                                             setData={setIncomes}
-                                            type={informer!.tipoContribuyente}
+                                            type={informer!.type}
                                             owner={owner}
                                             period={period}
                             />
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Familiares" key="3">
-                            <pre>{JSON.stringify(family, null, 2)}</pre>
                         </Tabs.TabPane>
                     </Tabs>}
         > {informer && <Informer informer={informer}/>} </PageHeader>
@@ -88,7 +118,7 @@ export function Dashboard() {
             visible={showExporter}
             bodyStyle={{paddingBottom: 80}}
             footer={<div style={{textAlign: 'right'}}>
-                <Button onClick={() => setShowExporter(false)} style={{marginRight: 8}}> Volper </Button>
+                <Button onClick={() => setShowExporter(false)} style={{marginRight: 8}}> Volver </Button>
             </div>}>
             <Exporter/>
         </Drawer>

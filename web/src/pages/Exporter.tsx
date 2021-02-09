@@ -11,7 +11,7 @@ export function Exporter() {
     const [incomes] = useLocalStorage<Ingreso[]>('ingresos', []);
     const [expenses] = useLocalStorage<Egreso[]>('egresos', []);
     const [identity] = useLocalStorage<Identificacion>('identificacion', EXAMPLE_DATA.identificacion);
-    const [family] = useLocalStorage<Familiar[]>('identificacion', []);
+    const [family] = useLocalStorage<Familiar[]>('familia', []);
 
     const [showArandukaExport, setShowArandukaExport] = useState(false);
 

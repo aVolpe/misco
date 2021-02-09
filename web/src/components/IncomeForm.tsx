@@ -1,14 +1,12 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Cascader, Col, Form, Input, InputNumber, Radio, Row} from 'antd';
+import {Button, Col, Form, Input, InputNumber, Radio, Row, Select} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
-import {CascaderOptionType} from 'antd/lib/cascader';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
 import MaskedInput from 'antd-mask-input/build/main/lib/MaskedInput';
 import {PersonWithLetterhead} from '../set/SETService';
-import {INGRESO_STATIC_DATA, INGRESO_TYPES} from '../set/ParametroIngreso';
-import {PersonType} from '../set/ParametroEgreso';
+import {IncomeType} from "../set/V2Enums";
 
 export interface IncomeFormProps {
     income?: IncomeFormData,
@@ -24,10 +22,11 @@ export interface IncomeFormData {
     date: string;
     letterhead?: string;
     incomeNumber?: string;
-    type: [string, string];
+    type: keyof typeof IncomeType;
     amount: number;
     isCredit: boolean;
 }
+
 
 export function IncomeForm({
                                income,
@@ -110,15 +109,9 @@ export function IncomeForm({
                     </Form.Item>
 
                     <Form.Item label="Tipo ingreso" name="type">
-                        <Cascader options={getSelectOptions('FISICO')}
-                                  placeholder="Tipo de egreso"
-                                  defaultValue={income ? income.type : ['1', 'REMDEP']}
-                                  showSearch={{
-                                      filter: (inputValue, path) => {
-                                          return path.some(option => (option.label! as string)
-                                              .toLowerCase().indexOf(inputValue.toLowerCase()) > -1);
-                                      }
-                                  }}
+                        <Select options={getAvailableTypes()}
+                                placeholder="Tipo de egreso"
+                                showSearch
                         />
                     </Form.Item>
 
@@ -191,17 +184,10 @@ export function IncomeForm({
     </GlobalHotKeys>;
 }
 
-function getSelectOptions(type: PersonType): CascaderOptionType[] {
-    const root = INGRESO_STATIC_DATA[type];
-    if (!root) return [];
-    return root.map(e => {
-        return {
-            value: e.codigo,
-            label: e.nombre,
-            children: e.opciones.map(stp => ({
-                value: stp,
-                label: INGRESO_TYPES[stp]
-            }))
-        }
-    })
+function getAvailableTypes() {
+    const types = IncomeType as Record<string, string>;
+    return Object.keys(types).map((k: any) => ({
+        value: k,
+        label: types[k]
+    }));
 }

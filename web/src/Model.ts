@@ -1,33 +1,3 @@
-export interface InvoiceDetails {
-    quantity: number;
-    description: string;
-
-    total: number;
-
-    // TODO extract this in a more generic way
-    fee10: number;
-    fee5: number;
-}
-
-export interface Invoice {
-    /**
-     * format XX-XX-XXXXXX
-     */
-    number: string;
-
-    ruc: string;
-    name: string;
-
-    address?: string;
-
-    /**
-     * Format yyyy-MM-dd
-     */
-    date: string;
-
-    details?: InvoiceDetails[];
-
-}
 
 export type Async<T, E = NetworkError> = {
     state: 'NO_REQUESTED'

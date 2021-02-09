@@ -1,13 +1,12 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Cascader, Col, Form, Input, InputNumber, Radio, Row} from 'antd';
+import {Button, Col, Form, Input, InputNumber, Radio, Row, Select} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
-import {EGRESO_STATIC_DATA, EGRESO_TYPES} from '../set/ParametroEgreso';
-import {CascaderOptionType} from 'antd/lib/cascader';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
 import MaskedInput from 'antd-mask-input/build/main/lib/MaskedInput';
 import {PersonWithLetterhead} from '../set/SETService';
+import {ExpenseDocumentType} from "../set/V2Enums";
 
 export interface ExpenseFormProps {
     expense?: ExpenseFormData,
@@ -23,7 +22,7 @@ export interface ExpenseFormData {
     date: string;
     letterhead?: string;
     expenseNumber?: string;
-    type: [string, string, string];
+    type: keyof typeof ExpenseDocumentType;
     amount: number;
     isCredit: boolean;
 }
@@ -109,15 +108,9 @@ export function ExpenseForm({
                     </Form.Item>
 
                     <Form.Item label="Tipo egreso" name="type">
-                        <Cascader options={getSelectOptions('FISICO')}
-                                  placeholder="Tipo de egreso"
-                                  defaultValue={expense ? expense.type : ['1', 'gasto', 'GPERS']}
-                                  showSearch={{
-                                      filter: (inputValue, path) => {
-                                          return path.some(option => (option.label! as string)
-                                              .toLowerCase().indexOf(inputValue.toLowerCase()) > -1);
-                                      }
-                                  }}
+                        <Select options={getAvailableTypes()}
+                                placeholder="Tipo de egreso"
+                                showSearch
                         />
                     </Form.Item>
 
@@ -191,23 +184,10 @@ export function ExpenseForm({
     </GlobalHotKeys>;
 }
 
-function getSelectOptions(type: 'FISICO' | 'SOCIEDAD_SIMPLE'): CascaderOptionType[] {
-    const root = EGRESO_STATIC_DATA[type];
-    if (!root) return [];
-    return root.map(e => {
-        return {
-            value: e.codigo,
-            label: e.nombre,
-            children: e.egresos.map(te => {
-                return {
-                    value: te.codigo,
-                    label: te.nombre,
-                    children: te.subtipos.map(stp => ({
-                        value: stp,
-                        label: EGRESO_TYPES[stp]
-                    }))
-                }
-            })
-        }
-    })
+function getAvailableTypes() {
+    const types = ExpenseDocumentType as Record<string, string>;
+    return Object.keys(types).map((k: any) => ({
+        value: k,
+        label: types[k]
+    }));
 }

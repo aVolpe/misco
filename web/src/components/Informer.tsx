@@ -1,11 +1,11 @@
 import React from 'react';
 import {Descriptions} from 'antd';
-import {Informante} from '../set/ArandukaModel';
+import {User} from "../set/Model";
 
-export function Informer(props: { informer: Informante }) {
+export function Informer(props: { informer: User }) {
 
     return <Descriptions size="small" column={3}>
-        <Descriptions.Item label="Nombre">{props.informer.nombre}</Descriptions.Item>
-        <Descriptions.Item label="RUC">{props.informer.ruc}-{props.informer.dv}</Descriptions.Item>
+        <Descriptions.Item label="Nombre">{props.informer.name}</Descriptions.Item>
+        <Descriptions.Item label="ID">{props.informer.identifier}</Descriptions.Item>
     </Descriptions>
 }

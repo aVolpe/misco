@@ -1,8 +1,7 @@
-import {Egreso, Ingreso} from './ArandukaModel';
 import moment from 'moment';
-import {SETService} from './SETService';
+import {Expense, Income} from "./Model";
 
-type Filtrable = Pick<Ingreso, 'relacionadoNombres' | 'relacionadoNumeroIdentificacion' | 'timbradoDocumento' | 'fecha'>;
+type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher'>;
 
 export class SETListManipulatorService {
 
@@ -11,21 +10,21 @@ export class SETListManipulatorService {
         return data.filter(tf => {
             let valid = true;
             if (toSearch)
-                valid = tf.relacionadoNombres.toLowerCase().includes(toSearch)
-                    || tf.relacionadoNumeroIdentificacion.toLowerCase().includes(toSearch)
-                    || (tf.timbradoDocumento || '').toLowerCase().includes(toSearch);
+                valid = tf.name.toLowerCase().includes(toSearch)
+                    || tf.identifier.toLowerCase().includes(toSearch)
+                    || (tf.voucher || '').toLowerCase().includes(toSearch);
             if (valid) {
-                valid = SETService.mapSETFormatToMoment(tf.fecha).isBetween(from, to, undefined, "[]");
+                valid = moment(tf.date).isBetween(from, to, undefined, "[]");
             }
             return valid
         })
     }
 
-    filterIncomes(data: Ingreso[], query: string | undefined, from: moment.Moment, to: moment.Moment): Ingreso[] {
+    filterIncomes(data: Income[], query: string | undefined, from: moment.Moment, to: moment.Moment): Income[] {
         return this.filter(data, query, from, to);
     }
 
-    filterExpenses(data: Egreso[], query: string | undefined, from: moment.Moment, to: moment.Moment): Egreso[] {
+    filterExpenses(data: Expense[], query: string | undefined, from: moment.Moment, to: moment.Moment): Expense[] {
         return this.filter(data, query, from, to);
     }
 }

@@ -1,18 +1,19 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, Col, DatePicker, Input, message, Popover, Row, Table, Typography} from 'antd';
+import {Button, Col, DatePicker, Input, message, Row, Table, Typography} from 'antd';
 import {Async, NRHelper, NRWrapper} from '../Model';
 import {Help} from '../components/Help';
 import {Person} from '../RucAPI';
 import {ExpenseForm, ExpenseFormData} from '../components/ExpenseForm';
-import {Egreso} from '../set/ArandukaModel';
 import {formatMoney} from '../utils/formatters';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {PersonWithLetterhead, SETService} from '../set/SETService';
-import {PersonType} from '../set/ParametroEgreso';
 import {useDebounce} from '../utils/Hooks';
 import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
 import {sumBy} from 'lodash';
+import {Expense} from "../set/Model";
+import {PersonType} from "../set/ParametroEgreso";
+import {ExpenseDocumentType, PaymentType} from "../set/V2Enums";
 
 export const emptyOwner: Person = {old: '', div: '', name: '', doc: ''};
 
@@ -20,15 +21,15 @@ const defaultExpense: ExpenseFormData = {
     date: '',
     letterhead: '',
     expenseNumber: '',
-    type: ['1', 'gasto', 'GPERS'],
+    type: "invoice",
     owner: emptyOwner,
     amount: 0,
     isCredit: false
 };
 
 export function ExpenseListPage(props: {
-    data: Egreso[];
-    setData: (newData: Egreso[]) => void;
+    data: Expense[];
+    setData: (newData: Expense[]) => void;
     owner: Person;
     type: PersonType;
     period: number;
@@ -45,7 +46,7 @@ export function ExpenseListPage(props: {
         moment().year(props.period).startOf('year').startOf('day'),
         moment().year(props.period).endOf('year').endOf('day'),
     ]);
-    const [data, setData] = useState<Egreso[]>(props.data);
+    const [data, setData] = useState<Expense[]>(props.data);
 
     useEffect(() => {
         setData(new SETListManipulatorService().filterExpenses(props.data, debouncedQuery, date[0], date[1]))
@@ -73,11 +74,11 @@ export function ExpenseListPage(props: {
         }
     }
 
-    function onRemove(d: Egreso) {
+    function onRemove(d: Expense) {
         props.setData(props.data.filter(it => it.id !== d.id));
     }
 
-    function onEdit(d: Egreso) {
+    function onEdit(d: Expense) {
         setCurrentId(d.id);
         setCurrent(service.mapToForm(d));
     }
@@ -95,7 +96,7 @@ export function ExpenseListPage(props: {
             <Col span={18}>
                 <Row gutter={[8, 8]} align="middle">
                     <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}} offset={1}>
-                        Busqueda:
+                        Búsqueda:
                     </Col>
                     <Col span={9}>
                         <Input placeholder="Por ruc/nombre/nro factura"
@@ -109,6 +110,20 @@ export function ExpenseListPage(props: {
                         <DatePicker.RangePicker value={date}
                                                 style={{width: '100%'}}
                                                 allowClear={false}
+                                                ranges={{
+                                                    [new Date().getFullYear() - 2]: [
+                                                        moment().subtract(2, 'year').startOf('year'),
+                                                        moment().subtract(2, 'year').endOf('year'),
+                                                    ],
+                                                    [new Date().getFullYear() - 1]: [
+                                                        moment().subtract(1, 'year').startOf('year'),
+                                                        moment().subtract(1, 'year').endOf('year'),
+                                                    ],
+                                                    [new Date().getFullYear()]: [
+                                                        moment().startOf('year'),
+                                                        moment().endOf('year')
+                                                    ]
+                                                }}
                                                 onChange={values => {
                                                     if (!values) return;
                                                     setDate([
@@ -178,11 +193,11 @@ function InvoiceEditor(props: {
 }
 
 function InvoiceTable(props: {
-    invoices: Egreso[]
-    onEdit(row: Egreso): void;
-    onRemove(row: Egreso): void;
+    invoices: Expense[]
+    onEdit(row: Expense): void;
+    onRemove(row: Expense): void;
 }) {
-    return <Table<Egreso>
+    return <Table<Expense>
         dataSource={props.invoices}
         size="small"
         pagination={{
@@ -197,44 +212,41 @@ function InvoiceTable(props: {
             defaultSortOrder: 'descend',
             sorter: (a, b) => a.id - b.id,
         }, {
-            title: 'Detalles',
-            dataIndex: 'timbradoCondicion',
+            title: 'Tipo',
+            dataIndex: 'type',
             align: 'right',
             render: (_, row) => <>
-                <Popover content={`${row.tipoTexto}/${row.tipoEgresoTexto}/${row.subtipoEgresoTexto}`}
-                         title={`${row.tipoTexto}/${row.tipoEgresoTexto}/${row.subtipoEgresoTexto}`}>
-                    <span>{row.tipo}/{row.tipoEgreso}/{row.subtipoEgreso}</span>
-                </Popover>
-                {row.timbradoCondicion && <><br/> <small>{row.timbradoCondicion}</small></>}
+                {ExpenseDocumentType[row.type]}
+                {row.paymentType && <><br/> <small>{PaymentType[row.paymentType]}</small></>}
             </>,
-            sorter: (a, b) => `${a.tipo}/${a.tipoEgreso}/${a.subtipoEgreso}`
-                .localeCompare(`${b.tipo}/${b.tipoEgreso}/${b.subtipoEgreso}`),
+            sorter: (a, b) => `${ExpenseDocumentType[a.type]}`
+                .localeCompare(`${ExpenseDocumentType[b.type]}`),
         }, {
             title: 'Fecha',
-            dataIndex: 'fecha',
-            sorter: (a, b) => a.fecha.localeCompare(b.fecha),
+            dataIndex: 'date',
+            sorter: (a, b) => a.date.localeCompare(b.date),
         }, {
             title: 'Emisor',
-            dataIndex: 'relacionadoNumeroIdentificacion',
+            dataIndex: 'identifier',
             align: 'left',
-            sorter: (a, b) => a.relacionadoNombres.localeCompare(b.relacionadoNombres),
+            sorter: (a, b) => a.name.localeCompare(b.name),
             render: (_, row) => <>
-                {row.relacionadoNombres} ({row.relacionadoNumeroIdentificacion})
+                {row.name} ({row.identifier})
             </>
         }, {
             title: 'Factura',
-            dataIndex: 'timbradoDocumento',
+            dataIndex: 'voucher',
             align: 'right',
             render: (_, row) => <>
-                {row.timbradoDocumento}
-                <br/><small>{row.timbradoNumero}</small>
+                {row.voucher}
+                <br/><small>{row.letterhead}</small>
             </>
         }, {
             title: 'Monto',
             align: 'right',
-            dataIndex: 'egresoMontoTotal',
+            dataIndex: 'amount',
             render: (a: number) => formatMoney(a),
-            sorter: (a, b) => a.egresoMontoTotal - b.egresoMontoTotal,
+            sorter: (a, b) => a.amount - b.amount,
         }, {
             title: 'Acciones', dataIndex: '', render: (_, row) => {
                 return <>
@@ -245,7 +257,7 @@ function InvoiceTable(props: {
         }]}
 
         summary={() => {
-            const sum = sumBy(props.invoices, 'egresoMontoTotal');
+            const sum = sumBy(props.invoices, 'amount');
             return <tr>
                 <th colSpan={3}>Total (todas las filas)</th>
                 <td colSpan={2}/>

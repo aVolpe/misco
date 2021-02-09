@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, Col, DatePicker, Input, message, Popover, Row, Table, Typography} from 'antd';
+import {Button, Col, DatePicker, Input, message, Row, Table, Typography} from 'antd';
 import {Person} from '../RucAPI';
-import {Ingreso} from '../set/ArandukaModel';
 import {formatMoney} from '../utils/formatters';
 import {PersonType} from '../set/ParametroEgreso';
 import {useDebounce} from '../utils/Hooks';
@@ -13,20 +12,22 @@ import {Async, NRHelper, NRWrapper} from '../Model';
 import {IncomeForm, IncomeFormData} from '../components/IncomeForm';
 import {emptyOwner} from './ExpenseListPage';
 import {Help} from '../components/Help';
+import {Income} from "../set/Model";
+import {IncomeType, PaymentType} from "../set/V2Enums";
 
 const defaultIncome: IncomeFormData = {
     date: '',
     letterhead: '',
     incomeNumber: '',
-    type: ['1', 'HPRSP'],
+    type: 'salary',
     owner: emptyOwner,
     amount: 0,
     isCredit: false
 };
 
 export function IncomeListPage(props: {
-    data: Ingreso[];
-    setData: (newData: Ingreso[]) => void;
+    data: Income[];
+    setData: (newData: Income[]) => void;
     owner: Person;
     type: PersonType;
     period: number;
@@ -40,7 +41,7 @@ export function IncomeListPage(props: {
         moment().year(props.period).startOf('year').startOf('day'),
         moment().year(props.period).endOf('year').endOf('day'),
     ]);
-    const [data, setData] = useState<Ingreso[]>(props.data);
+    const [data, setData] = useState<Income[]>(props.data);
     const service = useMemo(() => new SETService(props.period, props.owner, props.type, [], props.data),
         [props.data, props.period, props.type, props.owner]);
 
@@ -48,11 +49,11 @@ export function IncomeListPage(props: {
         setData(new SETListManipulatorService().filterIncomes(props.data, debouncedQuery, date[0], date[1]))
     }, [debouncedQuery, props.data, date]);
 
-    function onRemove(d: Ingreso) {
+    function onRemove(d: Income) {
         props.setData(props.data.filter(it => it.id !== d.id));
     }
 
-    function onEdit(d: Ingreso) {
+    function onEdit(d: Income) {
         setCurrentId(d.id);
         setCurrent(service.mapIngresoToForm(d));
     }
@@ -66,7 +67,7 @@ export function IncomeListPage(props: {
     function onSave(d: IncomeFormData) {
         console.log(d);
         if (currentId) {
-            message.info("Ingreso actualizado", 5);
+            message.info("Income actualizado", 5);
             props.setData(props.data.map(it => {
                 return it.id === currentId ? service.mapIncome(d, currentId) : it;
             }));
@@ -98,6 +99,20 @@ export function IncomeListPage(props: {
                     <DatePicker.RangePicker value={date}
                                             style={{width: '100%'}}
                                             allowClear={false}
+                                            ranges={{
+                                                [new Date().getFullYear() - 2]: [
+                                                    moment().subtract(2, 'year').startOf('year'),
+                                                    moment().subtract(2, 'year').endOf('year'),
+                                                ],
+                                                [new Date().getFullYear() - 1]: [
+                                                    moment().subtract(1, 'year').startOf('year'),
+                                                    moment().subtract(1, 'year').endOf('year'),
+                                                ],
+                                                [new Date().getFullYear()]: [
+                                                    moment().startOf('year'),
+                                                    moment().endOf('year')
+                                                ]
+                                            }}
                                             onChange={values => {
                                                 if (!values) return;
                                                 setDate([
@@ -129,11 +144,11 @@ export function IncomeListPage(props: {
 
 
 function IncomeTable(props: {
-    incomes: Ingreso[]
-    onEdit(row: Ingreso): void;
-    onRemove(row: Ingreso): void;
+    incomes: Income[]
+    onEdit(row: Income): void;
+    onRemove(row: Income): void;
 }) {
-    return <Table<Ingreso>
+    return <Table<Income>
         dataSource={props.incomes}
         size="small"
         pagination={{
@@ -148,36 +163,32 @@ function IncomeTable(props: {
             sorter: (a, b) => a.id - b.id,
         }, {
             title: 'Detalles',
-            dataIndex: 'timbradoCondicion',
+            dataIndex: 'type',
             align: 'right',
             render: (_, row) => <>
-                <Popover content={`${row.tipoTexto}/${row.tipoIngresoTexto}`}
-                         title={`${row.tipoTexto}/${row.tipoIngresoTexto}`}>
-                    <span>{row.tipo}/{row.tipoIngreso}</span>
-                </Popover>
-                {row.timbradoCondicion && <><br/> <small>{row.timbradoCondicion}</small></>}
+                <span>{IncomeType[row.type]}</span>
+                {<><br/> <small>{PaymentType[row.paymentType]}</small></>}
             </>,
-            sorter: (a, b) => `${a.tipo}/${a.tipoIngresoTexto}`
-                .localeCompare(`${b.tipo}/${b.tipoIngresoTexto}`),
+            sorter: (a, b) => IncomeType[a.type]
+                .localeCompare(IncomeType[b.type]),
         }, {
             title: 'Fecha',
-            dataIndex: 'fecha',
-            sorter: (a, b) => (a.fecha || '').localeCompare(b.fecha || ''),
+            dataIndex: 'date',
+            sorter: (a, b) => (a.date || '').localeCompare(b.date || ''),
         }, {
             title: 'Receptor',
-            dataIndex: 'relacionadoNumeroIdentificacion',
+            dataIndex: 'identifier',
             align: 'left',
             render: (_, row) => <>
-                {row.relacionadoNombres}
-                <br/>({row.relacionadoNumeroIdentificacion})
-                {row.timbradoCondicion && <><br/>({row.timbradoCondicion})</>}
+                {row.name}
+                <br/>({row.identifier})
             </>
         }, {
             title: 'Monto',
             align: 'right',
-            dataIndex: 'ingresoMontoTotal',
+            dataIndex: 'amount',
             render: (a: number) => formatMoney(a),
-            sorter: (a, b) => a.ingresoMontoTotal - b.ingresoMontoTotal,
+            sorter: (a, b) => a.amount - b.amount,
         }, {
             title: 'Acciones', dataIndex: '', render: (_, row) => {
                 return <>
@@ -189,7 +200,7 @@ function IncomeTable(props: {
 
         ]}
         summary={pageData => {
-            const sum = sumBy(props.incomes, 'ingresoMontoTotal');
+            const sum = sumBy(props.incomes, 'amount');
             return <tr>
                 <th colSpan={3}>Total (todas las filas)</th>
                 <td/>
