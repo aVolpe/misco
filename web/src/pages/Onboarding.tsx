@@ -1,8 +1,10 @@
-import React from 'react';
-import {Alert, Button, Col, PageHeader, Row, Timeline, Upload} from 'antd';
+import React, {useState} from 'react';
+import {Alert, Button, Col, Form, Input, message, Modal, PageHeader, Radio, Row, Timeline, Upload} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {RcFile} from 'antd/es/upload';
 import {SETImporter} from '../set/SETImporter';
+import {User} from "../set/Model";
+import {writeStorage} from "@rehooks/local-storage";
 
 function doProcess(file: RcFile) {
     return new Promise(resolve => {
@@ -11,11 +13,23 @@ function doProcess(file: RcFile) {
         reader.onload = () => {
             const data = (JSON.parse(reader.result as string));
             new SETImporter().doImport(data);
+            resolve();
         };
     });
 }
 
+async function fromScratch(user: User) {
+    // TODO move to a logic file
+    writeStorage('informante', user);
+    writeStorage('ingresos', []);
+    writeStorage('egresos', []);
+}
+
 export function Onboarding() {
+
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+
+
     return <PageHeader ghost={false}
                        style={{border: '1px solid rgb(235, 237, 240)'}}
                        title="MISCO"
@@ -25,7 +39,7 @@ export function Onboarding() {
             <Col span={24}>
                 <Alert message=" Para usar el sistema debes importar datos del Aranduka " type="warning"/>
             </Col>
-            <Col>
+            <Col span={24}>
 
                 <Timeline>
                     <Timeline.Item>
@@ -57,12 +71,82 @@ export function Onboarding() {
                     </Timeline.Item>
                 </Timeline>
             </Col>
+            <Col span={24}>
+                <Button onClick={() => setModalVisible(true)} type="primary">
+                    También puedes empezar desde 0 apretando este botón
+                </Button>
+            </Col>
 
         </Row>
-
-
-        ,
+        <FromScratchModal visible={modalVisible}
+                          onCancel={() => setModalVisible(false)}
+                          onAccept={fromScratch}/>
 
 
     </PageHeader>
+}
+
+function FromScratchModal(props: {
+    visible: boolean;
+    onCancel: () => void;
+    onAccept: (u: User) => Promise<void>;
+}) {
+    const [form] = Form.useForm();
+    const [working, setWorking] = useState<boolean>(false);
+    const layout = {
+        labelCol: {span: 8},
+        wrapperCol: {span: 16},
+    };
+
+    return <Modal visible={props.visible}
+                  title="Empezar desde 0"
+                  okText="Aceptar"
+                  cancelText="Cancelar"
+                  onCancel={props.onCancel}
+                  onOk={() => {
+                      message.loading({key: "scratch", message: "Guardando"});
+                      setWorking(true);
+                      form.validateFields()
+                          .then(values => {
+                              return props.onAccept({
+                                  identifier: values.identifier,
+                                  name: values.name,
+                                  type: values.type,
+                                  version: 2
+                              });
+                          })
+                          .then(() => {
+                              form.resetFields();
+                              message.success({key: "scratch", message: "Bienvenido"})
+                          })
+                          .catch(info => {
+                              console.warn(info);
+                              message.warning({key: "scratch", message: "Error al validar campos"});
+                          })
+                          .finally(() => setWorking(false))
+                      ;
+                  }}
+    >
+        <Form form={form}
+              {...layout}
+              layout="horizontal"
+              name="form_in_modal"
+              initialValues={{type: "FISICO"}}
+        >
+            <Form.Item name="identifier" label="Documento"
+                       rules={[{required: true, message: 'Ingrese su documento con digito verificador'}]}>
+                <Input disabled={working}/>
+            </Form.Item>
+            <Form.Item name="name" label="Nombre"
+                       rules={[{required: true, message: 'Ingrese su nombre'}]}>
+                <Input disabled={working}/>
+            </Form.Item>
+            <Form.Item name="type" label="Tipo">
+                <Radio.Group disabled={working} defaultValue="FISICO">
+                    <Radio value="FISICO">Físico</Radio>
+                    <Radio value="SOCIEDAD_SIMPLE">Sociedad simple</Radio>
+                </Radio.Group>
+            </Form.Item>
+        </Form>
+    </Modal>
 }
