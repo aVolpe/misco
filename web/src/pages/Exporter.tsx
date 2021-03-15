@@ -1,41 +1,17 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {useLocalStorage} from '@rehooks/local-storage';
-import {Egreso, Familiar, Identificacion, Informante, Ingreso, PresentationType} from '../set/ArandukaModel';
-import {EXAMPLE_DATA} from '../set/ExampleData';
-import {SETExporter} from '../set/SETExporter';
-import {Button, Col, Form, InputNumber, Modal, Radio, Row} from 'antd';
+import {Button, Col, Row} from 'antd';
+import {Expense, Income, User} from "../set/Model";
+import {SETExporter} from "../set/SETExporter";
 
 export function Exporter() {
 
-    const [informer] = useLocalStorage<Informante>('informante', EXAMPLE_DATA.informante);
-    const [incomes] = useLocalStorage<Ingreso[]>('ingresos', []);
-    const [expenses] = useLocalStorage<Egreso[]>('egresos', []);
-    const [identity] = useLocalStorage<Identificacion>('identificacion', EXAMPLE_DATA.identificacion);
-    const [family] = useLocalStorage<Familiar[]>('familia', []);
-
-    const [showArandukaExport, setShowArandukaExport] = useState(false);
+    const [informer] = useLocalStorage<User>('informante');
+    const [incomes] = useLocalStorage<Income[]>('ingresos', []);
+    const [expenses] = useLocalStorage<Expense[]>('egresos', []);
 
     function downloadAll() {
-        new SETExporter()
-            .downloadData({
-                ingresos: incomes!,
-                familiares: family!,
-                identificacion: identity!,
-                informante: informer!,
-                egresos: expenses!
-            }, 'SIMPLE')
-    }
-
-    function downloadPeriod(period: number, type: PresentationType) {
-        new SETExporter()
-            .downloadPeriod({
-                ingresos: incomes!,
-                familiares: family!,
-                identificacion: identity!,
-                informante: informer!,
-                egresos: expenses!
-            }, period, type);
-        setShowArandukaExport(false);
+        new SETExporter().downloadAll(informer!, {informer, incomes, expenses});
     }
 
     function downloadIncomesExcel() {
@@ -70,18 +46,6 @@ export function Exporter() {
             </tr>
             <tr>
                 <td>
-                    <b>Aranduka</b>
-                    <br/>
-                    <small>Todos los datos almacenados, filtrados por periodo</small>
-                </td>
-                <td style={{verticalAlign: 'bottom'}}>
-                    <Button onClick={() => setShowArandukaExport(true)} style={{width: '100%'}}>
-                        Descargar Aranduka
-                    </Button>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <b>Ingresos en excel</b>
                     <br/>
                     <small>Exportar todos los ingresos, en formato excel para su manipulación</small>
@@ -102,48 +66,7 @@ export function Exporter() {
             </tr>
             </tbody>
         </table>
-        <Modal visible={showArandukaExport}
-               title="Exportar a aranduka"
-               footer={null}
-               onCancel={() => setShowArandukaExport(false)}
-        >
-            <ArandukaExport ide={identity!}
-                            inf={informer!}
-                            onFinish={d => downloadPeriod(d.periodo, d.tipoPresentacion)}/>
-        </Modal>
 
     </Row>
 }
 
-function ArandukaExport(props: {
-    inf: Informante,
-    ide: Identificacion,
-    onFinish: (data: { tipoPresentacion: PresentationType, periodo: number }) => void
-}) {
-    return <div>
-        <h3>Debes introducir los datos para la descarga</h3>
-        <Form wrapperCol={{span: 20}}
-              labelCol={{span: 4}}
-              onFinish={re => props.onFinish({tipoPresentacion: re.tipoPresentacion, periodo: re.periodo})}
-              initialValues={{
-                  tipoPresentacion: props.ide.tipoPresentacion,
-                  periodo: Number(props.ide.periodo)
-              }}>
-            <Form.Item label="Periodo" name="periodo" rules={[{required: true}]}>
-                <InputNumber style={{width: '100%'}}/>
-            </Form.Item>
-            <Form.Item label="Tipo" name="tipoPresentacion">
-                <Radio.Group>
-                    <Radio.Button value="ORIGINAL">ORIGINAL</Radio.Button>
-                    <Radio.Button value="RECTIFICATIVA">RECTIFICATIVA</Radio.Button>
-                </Radio.Group>
-            </Form.Item>
-            <Form.Item wrapperCol={{offset: 4, span: 16}}>
-                <Button type="primary" htmlType="submit">
-                    Descargar
-                </Button>
-            </Form.Item>
-        </Form>
-
-    </div>
-}

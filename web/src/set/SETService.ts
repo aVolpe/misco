@@ -68,8 +68,8 @@ export class SETService {
     mapInvoice(source: ExpenseFormData, id?: number): Expense {
 
         return {
-            date: source.date,
-            id: id || ++this.lastIncomeId,
+            date: SETService.mapShortToStorageFormat(source.date),
+            id: id || ++this.lastInvoiceId,
             paymentType: source.isCredit ? 'credit' : 'cash',
             voucher: source.expenseNumber,
             letterhead: source.letterhead,
@@ -89,7 +89,7 @@ export class SETService {
             id: id || ++this.lastIncomeId,
             letterhead: source.letterhead,
             paymentType: source.isCredit ? 'credit' : 'cash',
-            date: source.date,
+            date: SETService.mapShortToStorageFormat(source.date),
             voucher: source.incomeNumber,
             type: source.type,
             name: source.owner.name,
@@ -154,6 +154,13 @@ export class SETService {
         return moment(source, "DD/MM/YY").format("YYYY-MM-DD")
     }
 
+    /**
+     * Converts a short date to the storage format
+     */
+    private static mapShortToStorageFormat(source: string) {
+        return moment(source, "DD/MM/YY").format("YYYY/MM/DD")
+    }
+
     public static mapDateFromSetFormat(source: string) {
         return moment(source, "YYYY-MM-DD").format("DD/MM/YY")
     }
@@ -174,5 +181,9 @@ export class SETService {
         return SETService.mapMomentToSETFormat(moment("1990-01-01")
             .month(parseInt(source) - 1)
             .year(parseInt(period)))
+    }
+
+    static mapLocalToMoment(date: string) {
+        return moment(date, "YYYY/MM/DD")
     }
 }

@@ -28,7 +28,13 @@ export class VersionMigrator {
             || !!param.find(p => this.needsMigration(p));
     }
 
-    public migrateUser(base: Informante | User): User {
+    public migrateUser(base: Informante | User | undefined | null | string): User {
+        if (base === null || base === undefined || typeof base === 'string') return {
+            version: 2,
+            identifier: '0-0',
+            name: 'EMPY',
+            type: 'FISICO'
+        };
         if ('version' in base) return base;
         return {
             version: 2,

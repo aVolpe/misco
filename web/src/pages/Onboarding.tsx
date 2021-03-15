@@ -5,6 +5,7 @@ import {RcFile} from 'antd/es/upload';
 import {SETImporter} from '../set/SETImporter';
 import {User} from "../set/Model";
 import {writeStorage} from "@rehooks/local-storage";
+import DigitGenerator from "../set/DigitGenerator";
 
 function doProcess(file: RcFile) {
     return new Promise(resolve => {
@@ -67,7 +68,7 @@ export function Onboarding() {
                             </Button>
                         </Upload>
                         <br/>
-                        <small>Tambien puedes utilizar el archivo que genera este sistema.</small>
+                        <small>También puedes utilizar el archivo que genera este sistema.</small>
                     </Timeline.Item>
                 </Timeline>
             </Col>
@@ -84,6 +85,11 @@ export function Onboarding() {
 
 
     </PageHeader>
+}
+
+function addVerifier(document: string): string {
+    if (document.indexOf('-') >= 0) return document;
+    return `${document}-${new DigitGenerator().getDigitoVerificadorBase11(document)}`
 }
 
 function FromScratchModal(props: {
@@ -109,8 +115,8 @@ function FromScratchModal(props: {
                       form.validateFields()
                           .then(values => {
                               return props.onAccept({
-                                  identifier: values.identifier,
-                                  name: values.name,
+                                  identifier: addVerifier(values.identifier),
+                                  name: `${values.name}`.toUpperCase(),
                                   type: values.type,
                                   version: 2
                               });
@@ -134,7 +140,7 @@ function FromScratchModal(props: {
               initialValues={{type: "FISICO"}}
         >
             <Form.Item name="identifier" label="Documento"
-                       rules={[{required: true, message: 'Ingrese su documento con digito verificador'}]}>
+                       rules={[{required: true, message: 'Ingrese su documento'}]}>
                 <Input disabled={working}/>
             </Form.Item>
             <Form.Item name="name" label="Nombre"

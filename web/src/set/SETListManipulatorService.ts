@@ -1,5 +1,6 @@
 import moment from 'moment';
 import {Expense, Income} from "./Model";
+import {SETService} from "./SETService";
 
 type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher'>;
 
@@ -14,7 +15,7 @@ export class SETListManipulatorService {
                     || tf.identifier.toLowerCase().includes(toSearch)
                     || (tf.voucher || '').toLowerCase().includes(toSearch);
             if (valid) {
-                valid = moment(tf.date).isBetween(from, to, undefined, "[]");
+                valid = SETService.mapLocalToMoment(tf.date).isBetween(from, to, undefined, "[]");
             }
             return valid
         })

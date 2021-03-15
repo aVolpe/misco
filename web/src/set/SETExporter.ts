@@ -3,6 +3,7 @@ import moment from 'moment';
 import download from 'downloadjs';
 import Papa from 'papaparse';
 import {SETService} from './SETService';
+import {User} from "./Model";
 
 export class SETExporter {
 
@@ -16,6 +17,16 @@ export class SETExporter {
         const name = `${data.informante.ruc}_${period}${pType}${now}.${type}`;
         const ct = 'application/json';
         download(new Blob([JSON.stringify(fixed, null, 2)]), name, ct);
+    }
+
+    downloadAll(userInfo: User, data: unknown) {
+
+        const type = 'json';
+        const now = moment().format('YYYYMMDDhhmm');
+        const name = `${userInfo.identifier}_${now}.${type}`;
+        const ct = 'application/json';
+        download(new Blob([JSON.stringify(data, null, 2)]), name, ct);
+
     }
 
     private fixDataTypes(data: ArandukaExport) {
@@ -63,10 +74,10 @@ export class SETExporter {
 
     }
 
-    downloadExcel(informer: Informante, identifier: string, toDownload: any[]) {
+    downloadExcel(informer: User, identifier: string, toDownload: any[]) {
         if (!Array.isArray(toDownload)) throw new Error('Invalid data to download');
 
-        const columns = new Set(['id', 'periodo', 'tipo', 'fecha']);
+        const columns = new Set<string>([]);
         if (toDownload.length > 0) {
             Object.keys(toDownload[0]).forEach(k => columns.add(k));
         }
@@ -78,7 +89,7 @@ export class SETExporter {
         console.log(csv);
 
         const now = moment().format('YYYYMMDDhhmm');
-        const name = `${informer.ruc}_${identifier}_${now}.csv`;
+        const name = `${informer.identifier}_${identifier}_${now}.csv`;
 
         download(new Blob([csv]), name, 'text/csv');
     }

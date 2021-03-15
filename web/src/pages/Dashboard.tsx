@@ -41,9 +41,12 @@ export function Dashboard() {
         setMigration(true);
 
         setTimeout(() => {
-            if (informer && vm.needsMigration(informer)) setInformer(vm.migrateUser(informer));
-            if (incomes && vm.anyNeedsMigration(incomes)) setIncomes(incomes.map(vm.migrateIncome));
-            if (expenses && vm.anyNeedsMigration(expenses)) setExpenses(expenses.map(vm.migrateExpense));
+            const lInformer = informer;
+            const lIncomes = incomes;
+            const lExpenses = expenses;
+            setInformer(vm.migrateUser(lInformer));
+            if (lIncomes && vm.anyNeedsMigration(lIncomes)) setIncomes(lIncomes.map(vm.migrateIncome));
+            if (lExpenses && vm.anyNeedsMigration(lExpenses)) setExpenses(lExpenses.map(vm.migrateExpense));
             setMigration(false);
         });
 

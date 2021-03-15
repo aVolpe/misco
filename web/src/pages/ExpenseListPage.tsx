@@ -84,7 +84,7 @@ export function ExpenseListPage(props: {
     }
 
     const keyMap = {
-        ADD_INVOICE: ["Control+n"],
+        ADD_INVOICE: ["Control+i"],
     };
 
     return <GlobalHotKeys
