@@ -68,7 +68,7 @@ export class SETService {
     mapInvoice(source: ExpenseFormData, id?: number): Expense {
 
         return {
-            date: SETService.mapShortToStorageFormat(source.date),
+            date: SETService.dateToStorageFormat(source.date),
             id: id || ++this.lastInvoiceId,
             paymentType: source.isCredit ? 'credit' : 'cash',
             voucher: source.expenseNumber,
@@ -89,7 +89,7 @@ export class SETService {
             id: id || ++this.lastIncomeId,
             letterhead: source.letterhead,
             paymentType: source.isCredit ? 'credit' : 'cash',
-            date: SETService.mapShortToStorageFormat(source.date),
+            date: SETService.dateToStorageFormat(source.date),
             voucher: source.incomeNumber,
             type: source.type,
             name: source.owner.name,
@@ -155,9 +155,17 @@ export class SETService {
     }
 
     /**
-     * Converts a short date to the storage format
+     * Converts a date to the storage format
      */
-    private static mapShortToStorageFormat(source: string) {
+    private static dateToStorageFormat(source: string) {
+        if (source.length === 10) {
+            // it doesn't like a short date
+            if (source === moment(source, "YYYY/MM/DD").format("YYYY/MM/DD")) {
+                // it's already a long date
+                return source;
+            }
+            throw new Error("Invalid short date: " + source);
+        }
         return moment(source, "DD/MM/YY").format("YYYY/MM/DD")
     }
 
