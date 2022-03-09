@@ -42,7 +42,7 @@ export class SETService {
             type: source.type,
             expenseNumber: source.voucher,
             letterhead: source.letterhead,
-            date: source.date,
+            date: SETService.storageToFormDate(source.date),
             isCredit: source.paymentType === 'credit'
         }
     }
@@ -178,7 +178,7 @@ export class SETService {
     }
 
     public static mapMomentToSETFormat(source: moment.Moment): string {
-        return source.format('YYYY-MM-DD')
+        return source.format('YYYY-MM-DD');
     }
 
     public static mapSETFormatToSetMonth(source: string) {
@@ -188,10 +188,14 @@ export class SETService {
     public static mapMonthToLocalFormat(source: string, period: string) {
         return SETService.mapMomentToSETFormat(moment("1990-01-01")
             .month(parseInt(source) - 1)
-            .year(parseInt(period)))
+            .year(parseInt(period)));
     }
 
     static mapLocalToMoment(date: string) {
-        return moment(date, "YYYY/MM/DD")
+        return moment(date, "YYYY/MM/DD");
+    }
+
+    static storageToFormDate(date: string) {
+        return SETService.mapLocalToMoment(date).format("DD/MM/YY");
     }
 }
