@@ -27,7 +27,8 @@ const defaultIncome: IncomeFormData = {
 
 export function IncomeListPage(props: {
     data: Income[];
-    setData: (newData: Income[]) => void;
+    onSave: (income: IncomeFormData, id?: number) => { wasNew: boolean };
+    doRemove: (incomeId: number) => void;
     owner: Person;
     type: PersonType;
     period: number;
@@ -49,9 +50,6 @@ export function IncomeListPage(props: {
         setData(new SETListManipulatorService().filterIncomes(props.data, debouncedQuery, date[0], date[1]))
     }, [debouncedQuery, props.data, date]);
 
-    function onRemove(d: Income) {
-        props.setData(props.data.filter(it => it.id !== d.id));
-    }
 
     function onEdit(d: Income) {
         setCurrentId(d.id);
@@ -65,19 +63,13 @@ export function IncomeListPage(props: {
     }
 
     function onSave(d: IncomeFormData) {
-        console.log(d);
-        if (currentId) {
+        if (props.onSave(d, currentId).wasNew) {
+            message.info(`Factura ${d.incomeNumber} guardada`, 5);
+            onNewIncome({...d, date: ''});
+        } else {
             message.info("Income actualizado", 5);
-            props.setData(props.data.map(it => {
-                return it.id === currentId ? service.mapIncome(d, currentId) : it;
-            }));
             setCurrentId(undefined);
             setCurrent(undefined);
-        } else {
-            // it's a new
-            message.info(`Factura ${d.incomeNumber} guardada`, 5);
-            props.setData([...props.data, service.mapIncome(d)]);
-            onNewIncome({...d, date: ''});
         }
     }
 
@@ -125,7 +117,7 @@ export function IncomeListPage(props: {
             </Row>
             <Row>
                 <IncomeTable incomes={data}
-                             onRemove={r => onRemove(r)}
+                             onRemove={r => props.doRemove(r.id)}
                              onEdit={onEdit}/>
             </Row>
         </Col>

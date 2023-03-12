@@ -29,7 +29,8 @@ const defaultExpense: ExpenseFormData = {
 
 export function ExpenseListPage(props: {
     data: Expense[];
-    setData: (newData: Expense[]) => void;
+    onSave: (expense: ExpenseFormData, id?: number) => { wasNew: boolean };
+    doRemove: (expenseId: number) => void;
     owner: Person;
     type: PersonType;
     period: number;
@@ -58,24 +59,14 @@ export function ExpenseListPage(props: {
     }
 
     function onSave(d: ExpenseFormData) {
-        // it's a save
-        if (currentId) {
+        if (props.onSave(d, currentId).wasNew) {
+            message.info(`Factura ${d.expenseNumber} guardada`, 5);
+            onNewExpense();
+        } else {
             message.info("Registro actualizado", 5);
-            props.setData(props.data.map(it => {
-                return it.id === currentId ? service.mapInvoice(d, currentId) : it;
-            }));
             setCurrentId(undefined);
             setCurrent(undefined);
-        } else {
-            // it's a new
-            message.info(`Factura ${d.expenseNumber} guardada`, 5);
-            props.setData([...props.data, service.mapInvoice(d)]);
-            onNewExpense();
         }
-    }
-
-    function onRemove(d: Expense) {
-        props.setData(props.data.filter(it => it.id !== d.id));
     }
 
     function onEdit(d: Expense) {
@@ -136,7 +127,7 @@ export function ExpenseListPage(props: {
                 </Row>
                 <Row>
                     <InvoiceTable invoices={data}
-                                  onRemove={r => onRemove(r)}
+                                  onRemove={r => props.doRemove(r.id)}
                                   onEdit={onEdit}/>
                 </Row>
             </Col>
