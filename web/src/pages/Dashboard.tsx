@@ -9,13 +9,14 @@ import {ParseResult} from '../import_parsers/ClipboardParser';
 import {useMiscoState} from '../misco';
 import {ExpenseFormData} from '../components/ExpenseForm';
 import {Person} from '../RucAPI';
+import {DuplicateHelper} from './DuplicateHelper';
 
 
 export function Dashboard() {
 
 
     const state = useMiscoState();
-    const [clipboardImporter, setClipboardImporter] = useState<boolean>(true);
+    const [clipboardImporter, setClipboardImporter] = useState<boolean>(false);
     const [showExporter, setShowExporter] = useState(false);
 
 
@@ -81,6 +82,9 @@ export function Dashboard() {
                                             owner={state.owner}
                                             period={state.period}
                             />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Egresos duplicados" key="3">
+                            <DuplicateHelper expenses={state.expenses} onRemove={state.removeExpense}/>
                         </Tabs.TabPane>
                     </Tabs>}
         > {state.informer && <Informer informer={state.informer}/>} </PageHeader>
