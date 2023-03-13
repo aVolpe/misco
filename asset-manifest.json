@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/misco/static/css/main.ffa29014.chunk.css",
-    "main.js": "/misco/static/js/main.d4502f51.chunk.js",
-    "main.js.map": "/misco/static/js/main.d4502f51.chunk.js.map",
+    "main.js": "/misco/static/js/main.cd0e5084.chunk.js",
+    "main.js.map": "/misco/static/js/main.cd0e5084.chunk.js.map",
     "runtime-main.js": "/misco/static/js/runtime-main.320ca70f.js",
     "runtime-main.js.map": "/misco/static/js/runtime-main.320ca70f.js.map",
     "static/css/2.2fbe55bd.chunk.css": "/misco/static/css/2.2fbe55bd.chunk.css",
     "static/js/2.10c6a1a6.chunk.js": "/misco/static/js/2.10c6a1a6.chunk.js",
     "static/js/2.10c6a1a6.chunk.js.map": "/misco/static/js/2.10c6a1a6.chunk.js.map",
     "index.html": "/misco/index.html",
-    "precache-manifest.b40b3b5d23bf033dacf9a00fb85ef206.js": "/misco/precache-manifest.b40b3b5d23bf033dacf9a00fb85ef206.js",
+    "precache-manifest.dfcbea110df77ad3663c4a21f366815e.js": "/misco/precache-manifest.dfcbea110df77ad3663c4a21f366815e.js",
     "service-worker.js": "/misco/service-worker.js",
     "static/css/2.2fbe55bd.chunk.css.map": "/misco/static/css/2.2fbe55bd.chunk.css.map",
     "static/css/main.ffa29014.chunk.css.map": "/misco/static/css/main.ffa29014.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.2fbe55bd.chunk.css",
     "static/js/2.10c6a1a6.chunk.js",
     "static/css/main.ffa29014.chunk.css",
-    "static/js/main.d4502f51.chunk.js"
+    "static/js/main.cd0e5084.chunk.js"
   ]
 }
