@@ -1,5 +1,5 @@
 import {Button, Col, Row} from 'antd';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {Expense} from '../set/Model';
 import {countBy} from 'lodash';
 
@@ -11,7 +11,8 @@ export function DuplicateHelper(props: {
     onRemove: (r: number) => void;
 }) {
 
-    const [current, setCurrent] = useState<Expense[]>([])
+    const [currentIdx, setCurrentIdx] = useState<number>(0)
+
     const duplicates = useMemo(() => {
         const byIdentifier = countBy(props.expenses, 'voucher')
         return Object.keys(byIdentifier).filter(k => {
@@ -19,24 +20,23 @@ export function DuplicateHelper(props: {
         })
     }, [props.expenses])
 
-    useEffect(() => {
-        if (duplicates.length === 0) {
-            setCurrent([]);
-            return;
-        }
-        const curr = duplicates[0];
-        setCurrent(props.expenses.filter(e => e.voucher === curr));
-    }, [props.expenses, duplicates]);
 
+    const idx = currentIdx > duplicates.length ? 0 : currentIdx;
+    const currentIdentifier = duplicates[idx];
+    const current = props.expenses.filter(e => e.voucher === currentIdentifier)
+    const total = Object.keys(duplicates).length;
 
-    console.log({current, duplicates});
     if (!current || current.length === 0) {
-        return <>No se encontraron duplicados.</>
+        return <>No se encontraron duplicados. ({currentIdx})</>
     }
 
     return <Row gutter={[20, 20]}>
         <Col span={24}>
-            Duplicado actual {current[0].identifier}, cantidad total {Object.keys(duplicates).length}
+            Duplicado actual {currentIdentifier} ({currentIdx + 1}), cantidad total {total}
+        </Col>
+        <Col span={24}>
+            <Button disabled={idx < 1} onClick={() => setCurrentIdx(d => idx - 1)}>Anterior</Button>
+            <Button disabled={idx + 1 === total} onClick={() => setCurrentIdx(d => idx + 1)}>Siguiente</Button>
         </Col>
         <Col>
             <Row>
