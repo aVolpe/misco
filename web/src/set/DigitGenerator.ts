@@ -1,6 +1,6 @@
 export default class DigitGenerator {
 
-    getDigitoVerificadorBase11(ruc: string) {
+    getDigitoVerificadorBase11(ruc: string): number {
         return this.getDigitoVerificador(ruc, 11);
     }
 

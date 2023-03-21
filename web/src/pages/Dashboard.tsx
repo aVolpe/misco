@@ -35,17 +35,23 @@ export function Dashboard() {
         })
     }
 
-    function saveImportedInvoice(data: Partial<ParseResult>) {
-        if (!data.ruc) return;
-        state.searchRuc(data.ruc)
-            .then(d => {
-                state.saveExpense(mapToExpense(data, d))
-                message.info(`Factura ${data.identifier} de ${d.name} importada`);
-                setClipboardImporter(false);
-            })
-            .catch(e => {
+    async function saveImportedInvoice(toImport: Array<Partial<ParseResult>>) {
+        const toAdd : ExpenseFormData[] = []
+        for (const data of toImport) {
+            if (!data.ruc) return;
+            try {
+                const owner = data.owner
+                    ? data.owner
+                    : await state.searchRuc(data.ruc);
+
+                toAdd.push(mapToExpense(data, owner))
+                message.info(`Factura ${data.identifier} de ${owner.name} importada`);
+            } catch (e) {
                 message.warning(`No se encuentra el ruc ${data.ruc}`);
-            })
+            }
+        }
+        state.addExpenses(toAdd);
+        setClipboardImporter(false);
     }
 
     if (state.isMigrating) {
@@ -105,8 +111,8 @@ export function Dashboard() {
     </>
 }
 
-function ClipboardImporterModal(props: { visible: boolean, onCancel: () => void, onOk: (v: Partial<ParseResult>) => void }) {
-    const [parsed, setParsed] = useState<Partial<ParseResult>>()
+function ClipboardImporterModal(props: { visible: boolean, onCancel: () => void, onOk: (v: Array<Partial<ParseResult>>) => void }) {
+    const [parsed, setParsed] = useState<Array<Partial<ParseResult>>>()
 
     return <Modal visible={props.visible} okText="Importar"
                   onCancel={() => props.onCancel()}

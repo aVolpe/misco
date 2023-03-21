@@ -3,10 +3,10 @@ import {Button, Col, Row} from 'antd';
 import {parseClipboard, ParseResult} from '../import_parsers/ClipboardParser';
 
 export function ClipboardImporter(props: {
-    onNewParsed: (parsed: Partial<ParseResult>) => void
+    onNewParsed: (parsed: Array<Partial<ParseResult>>) => void
 }) {
 
-    const [parsed, setParsed] = useState<Partial<ParseResult>>()
+    const [parsed, setParsed] = useState<Array<Partial<ParseResult>>>()
     const [raw, setRaw] = useState<string>('')
 
     function doParse() {
@@ -22,6 +22,7 @@ export function ClipboardImporter(props: {
         </Col>
         <Col span={24}>
             <Button onClick={doParse}>Parsear</Button>
+            <Button onClick={() => setParsed(undefined)}>Limpiar</Button>
         </Col>
         <Col span={24}>
             <pre>

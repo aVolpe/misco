@@ -1,5 +1,7 @@
 import {ExpenseDocumentType, PaymentType} from '../set/V2Enums';
 import moment from 'moment';
+import {Person} from '../RucAPI';
+import DigitGenerator from '../set/DigitGenerator';
 
 export interface ParseResult {
     type: keyof typeof ExpenseDocumentType;
@@ -9,17 +11,78 @@ export interface ParseResult {
     date: string;
     condition: keyof typeof PaymentType;
     total: number;
+    owner: Person;
 }
 
 
-export function parseClipboard(text: string): Partial<ParseResult> | undefined {
+export function parseClipboard(text: string): Array<Partial<ParseResult>> | undefined {
 
     if (!text || text.length === 0) return undefined;
 
-    if (text.includes('www.muv-app.co')) return muvParser(text);
+    if (text.includes('www.muv-app.co')) return [muvParser(text)];
+    if (text.includes('"datos":[{')) return marangatuImportVirtualParser(text);
 
     console.log("No template found, returning undefined");
     return undefined;
+}
+
+type MarangatuImportVirtual = {
+    datos: Array<{
+        documento: number,
+        rucVendedor: number,
+        nombreVendedor: string,
+        rucComprador: number,
+        nombreComprador: string,
+        tipoComprobanteCodigo: string,
+        tipoComprobante: 'FACTURA ELECTRÓNICA' | 'FACTURA' | 'OTHER',
+        timbrado: number,
+        tipoRegistro: unknown,
+        tipoDocumento: unknown,
+        fechaExpedicionComprobante: string,
+        tipoIdentificacion: string,
+        numeroIdentificacion: number,
+        misionDiplomatica: unknown,
+        numeroComprobante: string,
+        importeIva10: number,
+        importeIva5: number
+        importeExenta: number
+        iva10: number,
+        iva5: number
+        importeTotal: number,
+        totalIva?: number,
+        totalImporteSinIva?: number,
+        condicionCompra: 'Contado' | 'Credito',
+        cantidadCuotas: unknown,
+        elegido: unknown,
+        formaPresentacion: 'ELECTRÓNICO',
+        tipoIdentificacionInformado: 'RUC',
+        nombreInformado: unknown,
+        tipoIdentificadorVendedor: 'RUC',
+        tipoIdentificadorComprador: 'RUC'
+    }>
+}
+
+function marangatuImportVirtualParser(text: string): ParseResult[] {
+    const parsed = JSON.parse(text) as MarangatuImportVirtual;
+    const digit = new DigitGenerator();
+
+    return parsed?.datos?.map(d => {
+        if (!(['FACTURA ELECTRÓNICA', 'FACTURA'].includes(d.tipoComprobante))) throw new Error(`Unknown type ${d.tipoComprobante}`)
+        return {
+            date: moment(d.fechaExpedicionComprobante, "DD/MM/YYYY").format("YYYY/MM/DD"),
+            condition: d.condicionCompra === 'Contado' ? 'cash' : 'credit',
+            identifier: d.numeroComprobante,
+            letterhead: d.timbrado,
+            ruc: d.rucVendedor + "",
+            type: 'invoice',
+            total: d.importeTotal,
+            owner: {
+                doc: d.rucVendedor + "",
+                div: digit.getDigitoVerificadorBase11(d.rucVendedor + "") + "",
+                name: d.nombreVendedor
+            }
+        }
+    }) || [];
 }
 
 

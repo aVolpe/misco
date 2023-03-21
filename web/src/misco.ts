@@ -80,6 +80,10 @@ export function useMiscoState() {
         }
     }
 
+    function addExpenses(expense: Array<ExpenseFormData>) {
+        setExpenses([...(expenses || []), ...(expense.map(i => service.mapInvoice(i)))]);
+    }
+
     async function searchRuc(ruc: string) {
         return service.findRuc(ruc)
     }
@@ -116,6 +120,7 @@ export function useMiscoState() {
 
         expenses: expenses || [],
         saveExpense,
+        addExpenses,
         removeExpense,
 
         saveIncome,
