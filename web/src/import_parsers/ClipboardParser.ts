@@ -15,15 +15,96 @@ export interface ParseResult {
 }
 
 
+
 export function parseClipboard(text: string): Array<Partial<ParseResult>> | undefined {
 
     if (!text || text.length === 0) return undefined;
 
     if (text.includes('www.muv-app.co')) return [muvParser(text)];
     if (text.includes('"datos":[{')) return marangatuImportVirtualParser(text);
+    if (text.includes('Servicios de Banda Ancha')) return [tigoWifiParser(text)]
+    if (text.includes('TELEFÓNICA CELULAR DEL PARAGUAY S.A.E.')) return [tigoTelefParser(text)]
 
     console.log("No template found, returning undefined");
     return undefined;
+}
+
+function tigoWifiParser(text: string): Partial<ParseResult> {
+
+    (window as any).text = text;
+    const letterHeadPattern = /Timbrado N°:*:\s+(\d+)/
+    const totalPattern = /FAC .* (.*)\n/
+    const datePattern = /(\d\d\/\d\d\/\d\d\d\d)\n/
+    const identifierPattern = /FAC (.*) .*\n/
+
+    const letterHeadMatches = letterHeadPattern.exec(text);
+    const totalMatches = totalPattern.exec(text);
+    const dateMatches = datePattern.exec(text);
+    const identifierMatches = identifierPattern.exec(text);
+
+    console.log(dateMatches);
+    const ruc = "80000519";
+    console.log(ruc)
+
+    return {
+        type: 'invoice', // tigo is always factura,
+        condition: 'credit', // is always credit
+        letterhead: letterHeadMatches ? parseInt(letterHeadMatches[1]) : undefined,
+        ruc,
+        total: totalMatches ? parseInt(totalMatches[1]
+            .replace(/\./, '')
+            .replace(/\s/, '')
+        ) : undefined,
+        date: dateMatches ? moment(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
+        identifier: identifierMatches ? identifierMatches[1] : undefined,
+        owner: ruc ? {
+            name: 'TELEFÓNICA CELULAR DEL PARAGUAY S.A.E',
+            doc: ruc,
+            div: new DigitGenerator().getDigitoVerificadorBase11(ruc) + ""
+        } : undefined
+    }
+}
+
+/**
+ * Since april 2022, tigo emits virtual invoices, so this should be only used for older invoices.
+ */
+function tigoTelefParser(text: string): Partial<ParseResult> {
+
+    const letterHeadPattern = /Timbrado.*:\s+(\d+)/
+    const rucPattern = /RUC\s*:\s+(\d+)-\d/
+    const totalPattern = /TOTAL A PAGAR .*Gs. (.*)\n/
+    const datePattern = /Fecha de emisión: (.*)\n/
+    const conditionPattern = /Condición de Venta: Contado\((.*)\) Crédito\((.*)\)\s*\n/
+    const identifierPattern = /Nro. de factura: (.*)\n/
+
+    const letterHeadMatches = letterHeadPattern.exec(text);
+    const rucMatches = rucPattern.exec(text);
+    const totalMatches = totalPattern.exec(text);
+    const dateMatches = datePattern.exec(text);
+    const conditionMatches = conditionPattern.exec(text);
+    const identifierMatches = identifierPattern.exec(text);
+
+    console.log(dateMatches);
+    const ruc = rucMatches ? rucMatches[1] : undefined;
+    console.log(ruc)
+
+    return {
+        type: 'invoice', //muv is always factura,
+        condition: extractConditionType(conditionMatches),
+        letterhead: letterHeadMatches ? parseInt(letterHeadMatches[1]) : undefined,
+        ruc,
+        total: totalMatches ? parseInt(totalMatches[1]
+            .replace(/\./, '')
+            .replace(/\s/, '')
+        ) : undefined,
+        date: dateMatches ? moment(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
+        identifier: identifierMatches ? identifierMatches[1] : undefined,
+        owner: ruc ? {
+            name: 'TELEFÓNICA CELULAR DEL PARAGUAY S.A.E',
+            doc: ruc,
+            div: new DigitGenerator().getDigitoVerificadorBase11(ruc) + ""
+        } : undefined
+    }
 }
 
 type MarangatuImportVirtual = {

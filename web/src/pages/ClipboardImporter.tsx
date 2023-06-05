@@ -22,7 +22,10 @@ export function ClipboardImporter(props: {
         </Col>
         <Col span={24}>
             <Button onClick={doParse}>Parsear</Button>
-            <Button onClick={() => setParsed(undefined)}>Limpiar</Button>
+            <Button onClick={() => {
+                setParsed(undefined);
+                setRaw('');
+            }}>Limpiar</Button>
         </Col>
         <Col span={24}>
             <pre>
