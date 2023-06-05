@@ -4,7 +4,6 @@
   "homepage": "https://files.volpe.com.py/misco/",
   "private": true,
   "dependencies": {
-    "@ant-design/pro-components": "^2.5.5",
     "@rehooks/local-storage": "^2.4.4",
     "antd": "^5.5.2",
     "antd-mask-input": "^2.0.7",
