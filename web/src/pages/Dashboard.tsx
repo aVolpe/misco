@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {Button, Drawer, message, Modal, Result, Tabs} from 'antd';
-import {PageHeader} from '@ant-design/pro-components';
 import {ExpenseListPage} from './ExpenseListPage';
 import {IncomeListPage} from './IncomeListPage';
 import {Informer} from '../components/Informer';
@@ -11,6 +10,7 @@ import {useMiscoState} from '../misco';
 import {ExpenseFormData} from '../components/ExpenseForm';
 import {Person} from '../RucAPI';
 import {DuplicateHelper} from './DuplicateHelper';
+import {BasePage} from '../components/BasePage';
 
 
 export function Dashboard() {
@@ -37,7 +37,7 @@ export function Dashboard() {
     }
 
     async function saveImportedInvoice(toImport: Array<Partial<ParseResult>>) {
-        const toAdd : ExpenseFormData[] = []
+        const toAdd: ExpenseFormData[] = []
         for (const data of toImport) {
             if (!data.ruc) return;
             try {
@@ -62,39 +62,37 @@ export function Dashboard() {
     }
 
     return <>
-        <PageHeader ghost={false}
-                    style={{border: '1px solid rgb(235, 237, 240)'}}
-                    title="MISCO"
-                    subTitle="Sistema suplementario para Aranduka"
-                    extra={[
-                        <Button key="import" onClick={() => setClipboardImporter(true)}>Importar</Button>,
-                        <Button key="export" onClick={() => setShowExporter(true)}>Exportar</Button>,
-                        <Button key="clear" danger onClick={logout}>Cerrar sesión</Button>
-                    ]}
-                    footer={<Tabs defaultActiveKey="1">
-                        <Tabs.TabPane tab="Egresos" key="1">
-                            <ExpenseListPage data={state.expenses}
-                                             onSave={state.saveExpense}
-                                             doRemove={state.removeExpense}
-                                             type={state.informer?.type || 'FISICO'}
-                                             owner={state.owner}
-                                             period={state.period}
-                            />
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Ingresos" key="2">
-                            <IncomeListPage data={state.incomes}
-                                            onSave={state.saveIncome}
-                                            doRemove={state.removeIncome}
-                                            type={state.informer?.type || 'FISICO'}
-                                            owner={state.owner}
-                                            period={state.period}
-                            />
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Egresos duplicados" key="3">
-                            <DuplicateHelper expenses={state.expenses} onRemove={state.removeExpense}/>
-                        </Tabs.TabPane>
-                    </Tabs>}
-        > {state.informer && <Informer informer={state.informer}/>} </PageHeader>
+        <BasePage title="MISCO"
+                  subTitle="Sistema suplementario para Aranduka"
+                  extra={[
+                      <Button key="import" onClick={() => setClipboardImporter(true)}>Importar</Button>,
+                      <Button key="export" onClick={() => setShowExporter(true)}>Exportar</Button>,
+                      <Button key="clear" type="primary" danger onClick={logout}>Cerrar sesión</Button>
+                  ]}
+                  footer={<Tabs defaultActiveKey="1">
+                      <Tabs.TabPane tab="Egresos" key="1">
+                          <ExpenseListPage data={state.expenses}
+                                           onSave={state.saveExpense}
+                                           doRemove={state.removeExpense}
+                                           type={state.informer?.type || 'FISICO'}
+                                           owner={state.owner}
+                                           period={state.period}
+                          />
+                      </Tabs.TabPane>
+                      <Tabs.TabPane tab="Ingresos" key="2">
+                          <IncomeListPage data={state.incomes}
+                                          onSave={state.saveIncome}
+                                          doRemove={state.removeIncome}
+                                          type={state.informer?.type || 'FISICO'}
+                                          owner={state.owner}
+                                          period={state.period}
+                          />
+                      </Tabs.TabPane>
+                      <Tabs.TabPane tab="Egresos duplicados" key="3">
+                          <DuplicateHelper expenses={state.expenses} onRemove={state.removeExpense}/>
+                      </Tabs.TabPane>
+                  </Tabs>}
+        > {state.informer && <Informer informer={state.informer}/>} </BasePage>
         <Drawer
             title="Exportar datos"
             width={720}
@@ -112,10 +110,15 @@ export function Dashboard() {
     </>
 }
 
-function ClipboardImporterModal(props: { visible: boolean, onCancel: () => void, onOk: (v: Array<Partial<ParseResult>>) => void }) {
+function ClipboardImporterModal(props: {
+    visible: boolean,
+    onCancel: () => void,
+    onOk: (v: Array<Partial<ParseResult>>) => void
+}) {
     const [parsed, setParsed] = useState<Array<Partial<ParseResult>>>()
 
-    return <Modal visible={props.visible} okText="Importar"
+    return <Modal open={props.visible}
+                  okText="Importar"
                   onCancel={() => props.onCancel()}
                   okButtonProps={{disabled: !parsed}}
                   onOk={() => parsed && props.onOk(parsed)}

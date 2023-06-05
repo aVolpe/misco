@@ -6,7 +6,7 @@ import {SETImporter} from '../set/SETImporter';
 import {User} from "../set/Model";
 import {writeStorage} from "@rehooks/local-storage";
 import DigitGenerator from "../set/DigitGenerator";
-import {PageHeader} from '@ant-design/pro-components';
+import {BasePage} from '../components/BasePage';
 
 function doProcess(file: RcFile) {
     return new Promise<void>(resolve => {
@@ -32,46 +32,40 @@ export function Onboarding() {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
 
 
-    return <PageHeader ghost={false}
-                       style={{border: '1px solid rgb(235, 237, 240)'}}
-                       title="MISCO"
-                       subTitle="Sistema suplementario para Aranduka"
-                       extra={[]}>
+    return <BasePage title="MISCO" subTitle="Sistema suplementario para Aranduka">
         <Row gutter={[16, 16]} style={{margin: 16}}>
             <Col span={24}>
                 <Alert message=" Para usar el sistema debes importar datos del Aranduka " type="warning"/>
             </Col>
             <Col span={24}>
-
-                <Timeline>
-                    <Timeline.Item>
-                        Descarga e instala Aranduka
-                    </Timeline.Item>
-                    <Timeline.Item>
-                        Inicia sesión y completa tus tados
-                    </Timeline.Item>
-                    <Timeline.Item>
-                        Puedes cargar unas egresos e ingresos
-                    </Timeline.Item>
-                    <Timeline.Item>
-                        Exporta tus datos
-                    </Timeline.Item>
-                    <Timeline.Item>
-                        Descomprime el archivo, y luego subí el archivo que termina en <b>detalle.json</b>.
-                        <br/>
-                        <br/>
-                        <Upload beforeUpload={file => {
-                            doProcess(file);
-                            return false;
-                        }}>
-                            <Button>
-                                <UploadOutlined/> Click para subir archivo
-                            </Button>
-                        </Upload>
-                        <br/>
-                        <small>También puedes utilizar el archivo que genera este sistema.</small>
-                    </Timeline.Item>
-                </Timeline>
+                <Timeline
+                    mode="left"
+                    items={[{
+                        children: 'Descarga e instala Aranduka'
+                    }, {
+                        children: 'Inicia sesión y completa tus datos'
+                    }, {
+                        children: 'Puedes cargar unas egresos e ingresos',
+                    }, {
+                        children: 'Exporta tus datos'
+                    }, {
+                        children: <div>
+                            Descomprime el archivo, y luego subí el archivo que termina en <b>detalle.json</b>.
+                            <br/>
+                            <br/>
+                            <Upload beforeUpload={file => {
+                                doProcess(file);
+                                return false;
+                            }}>
+                                <Button>
+                                    <UploadOutlined/> Click para subir archivo
+                                </Button>
+                            </Upload>
+                            <br/>
+                            <small>También puedes utilizar el archivo que genera este sistema.</small>
+                        </div>
+                    }
+                    ]}/>
             </Col>
             <Col span={24}>
                 <Button onClick={() => setModalVisible(true)} type="primary">
@@ -83,9 +77,7 @@ export function Onboarding() {
         <FromScratchModal visible={modalVisible}
                           onCancel={() => setModalVisible(false)}
                           onAccept={fromScratch}/>
-
-
-    </PageHeader>
+    </BasePage>
 }
 
 function addVerifier(document: string): string {

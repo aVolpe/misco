@@ -115,7 +115,7 @@ export function IncomeListPage(props: {
                     />
                 </Col>
             </Row>
-            <Row>
+            <Row style={{paddingTop: 5}}>
                 <IncomeTable incomes={data}
                              onRemove={r => props.doRemove(r.id)}
                              onEdit={onEdit}/>

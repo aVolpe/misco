@@ -2,13 +2,16 @@ import React from 'react';
 import './App.css';
 import {MainPage} from './pages/MainPage';
 import {configure} from 'react-hotkeys';
+import {App} from 'antd';
 
 configure({
     logLevel: 'warn',
 
 });
-const App: React.FC = () => {
-    return <MainPage/>;
+const MiscoApp: React.FC = () => {
+    return <App>
+        <MainPage/>
+    </App>;
 };
 
-export default App;
+export default MiscoApp;

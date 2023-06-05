@@ -125,7 +125,7 @@ export function ExpenseListPage(props: {
                         />
                     </Col>
                 </Row>
-                <Row>
+                <Row style={{paddingTop: 5}}>
                     <InvoiceTable invoices={data}
                                   onRemove={r => props.doRemove(r.id)}
                                   onEdit={onEdit}/>
