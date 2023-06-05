@@ -30,14 +30,16 @@ export function Exporter() {
         new SETExporter().downloadExcel(informer!, 'egresos', expenses!);
     }
 
-    function downloadRequirement955(date: Dayjs) {
+    function downloadRequirement(date: Dayjs, type: 'MENSUAL' | 'ANUAL') {
         message.loading({content: 'Obteniendo registros', key: '955'});
         const filteredExpenses = new SETListManipulatorService()
-            .filterExpenses(expenses, undefined, date.startOf('month'), date.endOf('month'));
+            .filterExpenses(expenses, undefined,
+                date.startOf(type === 'MENSUAL' ? 'month' : 'year'),
+                date.endOf(type === 'MENSUAL' ? 'month' : 'year'));
 
         message.loading({content: 'Generando archivo', key: '955'});
         const identifier = informer?.identifier!;
-        return doExportToZip(identifier.substring(0, identifier.indexOf('-')), date.toDate(), 'MENSUAL', marangatuExportData, filteredExpenses)
+        return doExportToZip(identifier.substring(0, identifier.indexOf('-')), date.toDate(), type, marangatuExportData, filteredExpenses)
             .then(z => {
                 message.loading({content: `Descargando ${z.fileName}`, key: '955'});
                 setMarangatuExportData(z.lastIdentifier);
@@ -49,7 +51,7 @@ export function Exporter() {
             })
             .catch(e => {
                 console.warn(e);
-                message.error({content: `No se puede guardar el archivo`, key: '955', duration: 15});
+                message.error({content: `No se puede guardar el archivo (${e})`, key: '955', duration: 15});
             });
     }
 
@@ -109,9 +111,17 @@ export function Exporter() {
                     <td>
                         <b>Obligación 955 - Registro mensual de comprobantes</b>
                         <br/>
-                        <small>Todos lso comprobantes, para ser importados a Marangatu</small>
+                        <small>Todos los comprobantes, para ser importados a Marangatu</small>
                     </td>
-                    <Download955 download955={downloadRequirement955}/>
+                    <Download955 download955={d => downloadRequirement(d, 'MENSUAL')}/>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Obligación 956 - Registro Anual de Comprobantes</b>
+                        <br/>
+                        <small>Todos los comprobantes, para ser importados a Marangatu</small>
+                    </td>
+                    <Download956 download956={d => downloadRequirement(d, 'ANUAL')}/>
                 </tr>
                 </tbody>
             </table>
@@ -123,7 +133,7 @@ export function Exporter() {
 function Download955(props: {
     download955: (d: Dayjs) => void
 }) {
-    const [date, setDate] = useState(dayjs());
+    const [date, setDate] = useState(dayjs().add(-1, 'y'));
 
     return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
         <DatePicker value={date}
@@ -132,5 +142,20 @@ function Download955(props: {
                     format={monthFormat}
                     picker="month"/>
         <Button onClick={() => props.download955(date)} style={{width: '100%'}}>Exportar</Button>
+    </td>
+}
+
+function Download956(props: {
+    download956: (d: Dayjs) => void
+}) {
+    const [date, setDate] = useState(dayjs().add(-1, 'y'));
+
+    return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
+        <DatePicker value={date}
+                    style={{width: '100%'}}
+                    onChange={d => setDate(d!)}
+                    format="YYYY"
+                    picker="year"/>
+        <Button onClick={() => props.download956(date)} style={{width: '100%'}}>Exportar</Button>
     </td>
 }

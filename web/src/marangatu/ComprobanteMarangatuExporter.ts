@@ -1,6 +1,5 @@
 import {Expense} from '../set/Model';
 import Papa from 'papaparse';
-import {ExpenseDocumentType, ExpenseIdentifierType} from '../set/V2Enums';
 import {SETService} from '../set/SETService';
 import dayjs from 'dayjs';
 import JSZip from 'jszip';
@@ -52,12 +51,12 @@ export function doExport(
 
 function exportExpenses(expenses: Expense[]) {
     return Papa.unparse(expenses.map(e => ([
-        4,
-        mapExpenseType(e.type),
-        mapExpenseDate(e),
-        e.type === 'ips' ? null : e.voucher,
-        mapIdentifierType(e.identifierType),
-        e.identifier,
+        4, // 1
+        mapExpenseType(e), // 2
+        mapExpenseDate(e), // 3
+        e.type === 'ips' || e.type === 'cardSummary' ? null : e.voucher, // 4
+        mapIdentifierType(e), // 5
+        e.type === 'cardSummary' ? null : e.identifier, // 6
         e.name,
         e.amount,
         'N', // iva
@@ -78,11 +77,14 @@ function exportExpenses(expenses: Expense[]) {
  * View table 4 of `Especificación Técnica para Importación.pdf`
  */
 function mapExpenseType(
-    type: keyof typeof ExpenseDocumentType
+    e: Expense
 ): number {
-    if (type === 'invoice') return 109;
-    if (type === 'ips') return 206;
-    throw new Error(`Unmapped type ${type}`);
+    if (e.type === 'invoice') return 109;
+    if (e.type === 'ips') return 206;
+    if (e.type === 'salary') return 208;
+    if (e.type === 'publicIncomeTicket') return 204;
+    if (e.type === 'cardSummary') return 207;
+    throw new Error(`Unmapped type ${e.type} (${e.id})`);
 }
 
 /**
@@ -94,21 +96,26 @@ function mapExpenseType(
 function mapExpenseDate(
     e: Expense
 ): string {
-    if (e.type === 'invoice') return SETService.mapLocalToMoment(e.date).format('DD/MM/YYYY');
-    if (e.type === 'ips') return SETService.mapLocalToMoment(e.date).format('MM/YYYY');
+    if (e.type === 'invoice'
+        || e.type === 'publicIncomeTicket'
+        || e.type === 'cardSummary') return SETService.mapLocalToMoment(e.date).format('DD/MM/YYYY');
+    if (e.type === 'ips'
+        || e.type === 'salary') return SETService.mapLocalToMoment(e.date).format('MM/YYYY');
     throw new Error(`Unmapped type ${e.type} (${e.id})`);
 }
 
 /**
  * View table 3 of `Especificación Técnica para Importación.pdf`
- * @param identifierType
  */
-function mapIdentifierType(identifierType: keyof typeof ExpenseIdentifierType) {
-    switch (identifierType) {
+function mapIdentifierType(e: Expense): number | null {
+    if (e.type === 'ips'
+        || e.type === 'cardSummary') return null;
+    if (e.type === 'publicIncomeTicket') return 11; // always ruc
+    switch (e.identifierType) {
         case 'ruc':
             return 11;
         case 'migrationDocument':
-            throw new Error(`unsupported type for export ${identifierType}`);
+            throw new Error(`unsupported type for export ${e.identifierType} (${e.id})`);
         case 'passport':
             return 13;
         case 'document':
@@ -116,7 +123,7 @@ function mapIdentifierType(identifierType: keyof typeof ExpenseIdentifierType) {
         case 'externalProviderIdentifier':
             return 16;
         case 'employerNumber':
-            throw new Error(`unsupported type for export ${identifierType}`);
+            throw new Error(`unsupported type for export ${e.identifierType} (${e.id})`);
 
     }
 }
