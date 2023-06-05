@@ -4,7 +4,6 @@ import {Person} from '../RucAPI';
 import {formatMoney} from '../utils/formatters';
 import {PersonType} from '../set/ParametroEgreso';
 import {useDebounce} from '../utils/Hooks';
-import moment from 'moment';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
 import {sumBy} from 'lodash';
 import {PersonWithLetterhead, SETService} from '../set/SETService';
@@ -14,6 +13,7 @@ import {emptyOwner} from './ExpenseListPage';
 import {Help} from '../components/Help';
 import {Income} from "../set/Model";
 import {IncomeType, PaymentType} from "../set/V2Enums";
+import dayjs from 'dayjs';
 
 const defaultIncome: IncomeFormData = {
     date: '',
@@ -38,9 +38,9 @@ export function IncomeListPage(props: {
     const [currentId, setCurrentId] = useState<number>();
     const [query, setQuery] = useState('');
     const debouncedQuery = useDebounce(query, 500);
-    const [date, setDate] = useState<[moment.Moment, moment.Moment]>([
-        moment().year(props.period).startOf('year').startOf('day'),
-        moment().year(props.period).endOf('year').endOf('day'),
+    const [date, setDate] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+        dayjs().year(props.period).startOf('year').startOf('day'),
+        dayjs().year(props.period).endOf('year').endOf('day'),
     ]);
     const [data, setData] = useState<Income[]>(props.data);
     const service = useMemo(() => new SETService(props.period, props.owner, props.type, [], props.data),
@@ -93,16 +93,16 @@ export function IncomeListPage(props: {
                                             allowClear={false}
                                             ranges={{
                                                 [new Date().getFullYear() - 2]: [
-                                                    moment().subtract(2, 'year').startOf('year'),
-                                                    moment().subtract(2, 'year').endOf('year'),
+                                                    dayjs().subtract(2, 'year').startOf('year'),
+                                                    dayjs().subtract(2, 'year').endOf('year'),
                                                 ],
                                                 [new Date().getFullYear() - 1]: [
-                                                    moment().subtract(1, 'year').startOf('year'),
-                                                    moment().subtract(1, 'year').endOf('year'),
+                                                    dayjs().subtract(1, 'year').startOf('year'),
+                                                    dayjs().subtract(1, 'year').endOf('year'),
                                                 ],
                                                 [new Date().getFullYear()]: [
-                                                    moment().startOf('year'),
-                                                    moment().endOf('year')
+                                                    dayjs().startOf('year'),
+                                                    dayjs().endOf('year')
                                                 ]
                                             }}
                                             onChange={values => {
@@ -185,7 +185,7 @@ function IncomeTable(props: {
             title: 'Acciones', dataIndex: '', render: (_, row) => {
                 return <>
                     <Button onClick={() => props.onEdit(row)}>Editar</Button>
-                    <Button type="danger" onClick={() => props.onRemove(row)}>Eliminar</Button>
+                    <Button danger onClick={() => props.onRemove(row)}>Eliminar</Button>
                 </>
             }
         }

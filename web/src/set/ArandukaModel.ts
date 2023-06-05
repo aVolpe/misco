@@ -30,7 +30,7 @@ export interface Ingreso {
     tipo: string;
     periodo: string;
     tipoTexto: string;
-    fecha: string;
+    fecha?: string;
     mes?: string;
     ruc: string;
     tipoIngreso: string;

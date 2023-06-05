@@ -1,14 +1,15 @@
 import React, {useState} from 'react';
-import {Alert, Button, Col, Form, Input, message, Modal, PageHeader, Radio, Row, Timeline, Upload} from 'antd';
+import {Alert, App, Button, Col, Form, Input, Modal, Radio, Row, Timeline, Upload} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {RcFile} from 'antd/es/upload';
 import {SETImporter} from '../set/SETImporter';
 import {User} from "../set/Model";
 import {writeStorage} from "@rehooks/local-storage";
 import DigitGenerator from "../set/DigitGenerator";
+import {PageHeader} from '@ant-design/pro-components';
 
 function doProcess(file: RcFile) {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
         const reader = new FileReader();
         reader.readAsText(file, 'UTF-8');
         reader.onload = () => {
@@ -103,14 +104,15 @@ function FromScratchModal(props: {
         labelCol: {span: 8},
         wrapperCol: {span: 16},
     };
+    const {message} = App.useApp();
 
-    return <Modal visible={props.visible}
+    return <Modal open={props.visible}
                   title="Empezar desde 0"
                   okText="Aceptar"
                   cancelText="Cancelar"
                   onCancel={props.onCancel}
                   onOk={() => {
-                      message.loading({key: "scratch", message: "Guardando"});
+                      message.loading({key: "scratch", content: "Guardando"});
                       setWorking(true);
                       form.validateFields()
                           .then(values => {
@@ -123,11 +125,11 @@ function FromScratchModal(props: {
                           })
                           .then(() => {
                               form.resetFields();
-                              message.success({key: "scratch", message: "Bienvenido"})
+                              message.success({key: "scratch", content: "Bienvenido"})
                           })
                           .catch(info => {
                               console.warn(info);
-                              message.warning({key: "scratch", message: "Error al validar campos"});
+                              message.warning({key: "scratch", content: "Error al validar campos"});
                           })
                           .finally(() => setWorking(false))
                       ;

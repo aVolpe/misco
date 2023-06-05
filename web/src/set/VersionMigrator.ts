@@ -53,7 +53,7 @@ export class VersionMigrator {
             version: 2,
             id: base.id,
             amount: base.ingresoMontoTotal,
-            date: SETService.mapDateFromSetFormat(base.fecha),
+            date: SETService.mapDateFromSetFormat(base.fecha!),
             identifier: base.relacionadoNumeroIdentificacion,
             identifierType: 'ruc',
             irpAmount: 0,

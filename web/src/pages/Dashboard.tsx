@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {Button, Drawer, message, Modal, PageHeader, Result, Tabs} from 'antd';
+import {Button, Drawer, message, Modal, Result, Tabs} from 'antd';
+import {PageHeader} from '@ant-design/pro-components';
 import {ExpenseListPage} from './ExpenseListPage';
 import {IncomeListPage} from './IncomeListPage';
 import {Informer} from '../components/Informer';
@@ -68,7 +69,7 @@ export function Dashboard() {
                     extra={[
                         <Button key="import" onClick={() => setClipboardImporter(true)}>Importar</Button>,
                         <Button key="export" onClick={() => setShowExporter(true)}>Exportar</Button>,
-                        <Button key="clear" type="danger" onClick={logout}>Cerrar sesión</Button>
+                        <Button key="clear" danger onClick={logout}>Cerrar sesión</Button>
                     ]}
                     footer={<Tabs defaultActiveKey="1">
                         <Tabs.TabPane tab="Egresos" key="1">

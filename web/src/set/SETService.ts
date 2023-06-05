@@ -1,11 +1,11 @@
 import {ExpenseFormData} from '../components/ExpenseForm';
 import {Person, query as QueryRuc} from '../RucAPI';
 import {PersonType} from './ParametroEgreso';
-import moment from 'moment';
 import DigitGenerator from './DigitGenerator';
 import {findLast} from 'lodash';
 import {IncomeFormData} from '../components/IncomeForm';
 import {Expense, Income} from "./Model";
+import dayjs from 'dayjs';
 
 export interface PersonWithLetterhead extends Person {
     letterhead?: string;
@@ -151,7 +151,7 @@ export class SETService {
     }
 
     private static mapDateToSetFormat(source: string) {
-        return moment(source, "DD/MM/YY").format("YYYY-MM-DD")
+        return dayjs(source, "DD/MM/YY").format("YYYY-MM-DD")
     }
 
     /**
@@ -160,39 +160,39 @@ export class SETService {
     private static dateToStorageFormat(source: string) {
         if (source.length === 10) {
             // it doesn't like a short date
-            if (source === moment(source, "YYYY/MM/DD").format("YYYY/MM/DD")) {
+            if (source === dayjs(source, "YYYY/MM/DD").format("YYYY/MM/DD")) {
                 // it's already a long date
                 return source;
             }
             throw new Error("Invalid short date: " + source);
         }
-        return moment(source, "DD/MM/YY").format("YYYY/MM/DD")
+        return dayjs(source, "DD/MM/YY").format("YYYY/MM/DD")
     }
 
     public static mapDateFromSetFormat(source: string) {
-        return moment(source, "YYYY-MM-DD").format("DD/MM/YY")
+        return dayjs(source, "YYYY-MM-DD").format("DD/MM/YY")
     }
 
-    public static mapSETFormatToMoment(source: string): moment.Moment {
-        return moment(source, "YYYY-MM-DD");
+    public static mapSETFormatToMoment(source: string): dayjs.Dayjs {
+        return dayjs(source, "YYYY-MM-DD");
     }
 
-    public static mapMomentToSETFormat(source: moment.Moment): string {
+    public static mapMomentToSETFormat(source: dayjs.Dayjs): string {
         return source.format('YYYY-MM-DD');
     }
 
     public static mapSETFormatToSetMonth(source: string) {
-        return moment(source, "YYYY-MM-DD").month() + 1;
+        return dayjs(source, "YYYY-MM-DD").month() + 1;
     }
 
     public static mapMonthToLocalFormat(source: string, period: string) {
-        return SETService.mapMomentToSETFormat(moment("1990-01-01")
+        return SETService.mapMomentToSETFormat(dayjs("1990-01-01")
             .month(parseInt(source) - 1)
             .year(parseInt(period)));
     }
 
     static mapLocalToMoment(date: string) {
-        return moment(date, "YYYY/MM/DD");
+        return dayjs(date, "YYYY/MM/DD");
     }
 
     static storageToFormDate(date: string) {

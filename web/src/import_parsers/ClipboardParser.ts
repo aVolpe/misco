@@ -1,7 +1,7 @@
 import {ExpenseDocumentType, PaymentType} from '../set/V2Enums';
-import moment from 'moment';
 import {Person} from '../RucAPI';
 import DigitGenerator from '../set/DigitGenerator';
+import dayjs from 'dayjs';
 
 export interface ParseResult {
     type: keyof typeof ExpenseDocumentType;
@@ -13,7 +13,6 @@ export interface ParseResult {
     total: number;
     owner: Person;
 }
-
 
 
 export function parseClipboard(text: string): Array<Partial<ParseResult>> | undefined {
@@ -55,7 +54,7 @@ function tigoWifiParser(text: string): Partial<ParseResult> {
             .replace(/\./, '')
             .replace(/\s/, '')
         ) : undefined,
-        date: dateMatches ? moment(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
+        date: dateMatches ? dayjs(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
         identifier: identifierMatches ? identifierMatches[1] : undefined,
         owner: ruc ? {
             name: 'TELEFÓNICA CELULAR DEL PARAGUAY S.A.E',
@@ -97,7 +96,7 @@ function tigoTelefParser(text: string): Partial<ParseResult> {
             .replace(/\./, '')
             .replace(/\s/, '')
         ) : undefined,
-        date: dateMatches ? moment(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
+        date: dateMatches ? dayjs(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
         identifier: identifierMatches ? identifierMatches[1] : undefined,
         owner: ruc ? {
             name: 'TELEFÓNICA CELULAR DEL PARAGUAY S.A.E',
@@ -150,7 +149,7 @@ function marangatuImportVirtualParser(text: string): ParseResult[] {
     return parsed?.datos?.map(d => {
         if (!(['FACTURA ELECTRÓNICA', 'FACTURA'].includes(d.tipoComprobante))) throw new Error(`Unknown type ${d.tipoComprobante}`)
         return {
-            date: moment(d.fechaExpedicionComprobante, "DD/MM/YYYY").format("YYYY/MM/DD"),
+            date: dayjs(d.fechaExpedicionComprobante, "DD/MM/YYYY").format("YYYY/MM/DD"),
             condition: d.condicionCompra === 'Contado' ? 'cash' : 'credit',
             identifier: d.numeroComprobante,
             letterhead: d.timbrado,
@@ -194,7 +193,7 @@ export function muvParser(text: string): Partial<ParseResult> {
             .replace(/\./, '')
             .replace(/\s/, '')
         ) : undefined,
-        date: dateMatches ? moment(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
+        date: dateMatches ? dayjs(dateMatches[1], "DD-MM-YYYY").format("YYYY/MM/DD") : undefined,
         identifier: identifierMatches ? identifierMatches[1] : undefined,
     }
 }

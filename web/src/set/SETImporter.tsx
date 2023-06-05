@@ -1,8 +1,8 @@
 import {writeStorage} from '@rehooks/local-storage';
 import {ArandukaExport, Ingreso} from './ArandukaModel';
-import moment from 'moment';
 import {SETService} from './SETService';
 import {Income} from "./Model";
+import dayjs from 'dayjs';
 
 export class SETImporter {
 
@@ -26,7 +26,7 @@ export class SETImporter {
         writeStorage('familiares', data.familiares);
     }
 
-    private fixIncomes(ingresos: Array<Ingreso| Income>): Ingreso[] {
+    private fixIncomes(ingresos: Array<Ingreso | Income>): Ingreso[] {
         if (!ingresos || ingresos.length === 0) return [];
 
         return ingresos.map(ingreso => {
@@ -37,7 +37,7 @@ export class SETImporter {
             let newFecha = ingreso.fecha;
             if (!newFecha) {
                 if (ingreso.mes) {
-                    newFecha = SETService.mapMomentToSETFormat(moment("1990-01-01")
+                    newFecha = SETService.mapMomentToSETFormat(dayjs("1990-01-01")
                         .month(parseInt(ingreso.mes) - 1)
                         .year(parseInt(ingreso.periodo)));
                 } else {

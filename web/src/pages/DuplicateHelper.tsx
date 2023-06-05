@@ -42,7 +42,7 @@ export function DuplicateHelper(props: {
             <Row>
                 {current.map(c => <Col key={c.id}>
                     <pre>{JSON.stringify(c, null, 2)}</pre>
-                    <Button type="danger" onClick={() => props.onRemove(c.id)}>Eliminar este registro</Button>
+                    <Button danger onClick={() => props.onRemove(c.id)}>Eliminar este registro</Button>
                 </Col>)}
             </Row>
         </Col>

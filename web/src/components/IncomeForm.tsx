@@ -1,5 +1,5 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Col, Form, Input, InputNumber, Radio, Row, Select} from 'antd';
+import {Button, Col, Form, Input, InputNumber, InputRef, Radio, Row, Select} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
@@ -45,8 +45,7 @@ export function IncomeForm({
 
     const [rucQuery, setRucQuery] = useState('');
     const [form] = Form.useForm();
-    const refDate = useRef<MaskedInput>(null);
-    const refQuery = useRef<Input>(null);
+    const refDate = useRef<InputRef>(null);
 
     function onRucInput(key: string) {
         if (key === 'Enter') {
@@ -57,7 +56,7 @@ export function IncomeForm({
     useEffect(() => {
         if (!income) return;
         form.setFieldsValue(income);
-        if (refQuery.current) refQuery.current.setValue(income.owner.doc);
+        setRucQuery(income.owner.doc);
     }, [form, income]);
 
     const newLetterHead = NRWrapper.of(owner).map(o => o.letterhead).orElse('');
@@ -81,7 +80,6 @@ export function IncomeForm({
             isCredit: data.isCredit
         });
         if (refDate.current) refDate.current.focus();
-        if (refQuery.current) refQuery.current.setValue('');
         setRucQuery('');
     }
 
@@ -118,10 +116,9 @@ export function IncomeForm({
                     <Form.Item label="Buscar por RUC">
                         <Input placeholder="4787587, Arturo Volpe, ASISMED"
                                onKeyDown={evt => onRucInput(evt.key)}
-                               ref={refQuery}
+                               value={rucQuery}
                                defaultValue={income?.owner.doc}
                                onBlur={evt => {
-                                   setRucQuery(evt.target.value);
                                    onNewRuc(evt.target.value);
                                }}
                                onChange={evt => setRucQuery(evt.target.value)}
@@ -165,7 +162,7 @@ export function IncomeForm({
                     <Form.Item label="Monto" name="amount" rules={[{required: true}]}>
                         <InputNumber defaultValue={income?.amount}
                                      style={{width: '100%'}}
-                                     formatter={formatMoney}
+                                     formatter={m => formatMoney(m)}
                                      parser={parseMoney}
                         />
                     </Form.Item>

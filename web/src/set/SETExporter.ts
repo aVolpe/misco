@@ -1,9 +1,9 @@
 import {ArandukaExport, Egreso, Familiar, Identificacion, Informante, Ingreso, PresentationType} from './ArandukaModel';
-import moment from 'moment';
 import download from 'downloadjs';
 import Papa from 'papaparse';
 import {SETService} from './SETService';
 import {User} from "./Model";
+import dayjs from 'dayjs';
 
 export class SETExporter {
 
@@ -11,7 +11,7 @@ export class SETExporter {
 
         const fixed = this.fixDataTypes(data);
         const type = 'json';
-        const now = moment().format('YYYYMMDDhhmm');
+        const now = dayjs().format('YYYYMMDDhhmm');
         const period = nameFormat === 'FULL' ? `${data.identificacion.periodo}_` : '';
         const pType = nameFormat === 'FULL' ? `${data.identificacion.tipoPresentacion}_` : '';
         const name = `${data.informante.ruc}_${period}${pType}${now}.${type}`;
@@ -22,7 +22,7 @@ export class SETExporter {
     downloadAll(userInfo: User, data: unknown) {
 
         const type = 'json';
-        const now = moment().format('YYYYMMDDhhmm');
+        const now = dayjs().format('YYYYMMDDhhmm');
         const name = `${userInfo.identifier}_${now}.${type}`;
         const ct = 'application/json';
         download(new Blob([JSON.stringify(data, null, 2)]), name, ct);
@@ -40,7 +40,7 @@ export class SETExporter {
             if (i.fecha)
                 i.periodo = SETService.mapSETFormatToMoment(i.fecha).year() + '';
 
-            if (i.tipo === "5") {
+            if (i.tipo === "5" && i.fecha) {
                 i.mes = `${SETService.mapSETFormatToSetMonth(i.fecha)}`;
                 delete i.fecha;
                 delete i.timbradoDocumento;
@@ -88,7 +88,7 @@ export class SETExporter {
         });
         console.log(csv);
 
-        const now = moment().format('YYYYMMDDhhmm');
+        const now = dayjs().format('YYYYMMDDhhmm');
         const name = `${informer.identifier}_${identifier}_${now}.csv`;
 
         download(new Blob([csv]), name, 'text/csv');

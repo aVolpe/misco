@@ -11,7 +11,7 @@ export function formatMoney(value: any, symbol?: string, decimalDigits?: number)
     return `${prefix}${formattedAmount}`;
 }
 
-export function parseMoney(value?: string): number {
+export function parseMoney(value?: unknown): number {
     if (!value) return 0;
     if (typeof value === 'number') return value;
     if (typeof value !== 'string') return 0;

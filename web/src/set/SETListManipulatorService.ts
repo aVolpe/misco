@@ -1,15 +1,19 @@
-import moment from 'moment';
 import {Expense, Income} from "./Model";
 import {SETService} from "./SETService";
-import {IncomeType, ExpenseDocumentType} from './V2Enums';
+import {ExpenseDocumentType, IncomeType} from './V2Enums';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+dayjs.extend(isBetween);
 
-type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher'> & { type: keyof typeof IncomeType | keyof typeof ExpenseDocumentType};
+type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher'> & {
+    type: keyof typeof IncomeType | keyof typeof ExpenseDocumentType
+};
 
 const SPECIAL_KEYS: string[] = ['type'];
 
 export class SETListManipulatorService {
 
-    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: moment.Moment, to: moment.Moment): T[] {
+    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): T[] {
         const toSearch = (query || '');
         const typeToSearch = this.getTypeToSearch(toSearch);
         const fullText = this.cleanSearch(toSearch);
@@ -32,6 +36,7 @@ export class SETListManipulatorService {
             return valid
         })
     }
+
     getTypeToSearch(toSearch: string): string | undefined {
         // TODO implement other types of search
         // keep a space to simplify the code at the end
@@ -64,11 +69,11 @@ export class SETListManipulatorService {
         return cleaned.trim();
     }
 
-    filterIncomes(data: Income[], query: string | undefined, from: moment.Moment, to: moment.Moment): Income[] {
+    filterIncomes(data: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): Income[] {
         return this.filter(data, query, from, to);
     }
 
-    filterExpenses(data: Expense[], query: string | undefined, from: moment.Moment, to: moment.Moment): Expense[] {
+    filterExpenses(data: Expense[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): Expense[] {
         return this.filter(data, query, from, to);
     }
 }
