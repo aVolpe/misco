@@ -49,6 +49,7 @@ export function doExport(
     }
 }
 
+
 function exportExpenses(expenses: Expense[]) {
     return Papa.unparse(expenses.map(e => ([
         4, // 1
@@ -57,8 +58,8 @@ function exportExpenses(expenses: Expense[]) {
         e.type === 'ips' || e.type === 'cardSummary' ? null : e.voucher, // 4
         mapIdentifierType(e), // 5
         e.type === 'cardSummary' ? null : e.identifier, // 6
-        e.name,
-        e.amount,
+        mapName(e), // 7
+        e.amount, // 8
         'N', // iva
         'N', // ire
         'S', // irp-rsp
@@ -72,6 +73,12 @@ function exportExpenses(expenses: Expense[]) {
     ])));
 }
 
+function mapName(e: Expense) {
+    if (e.type === 'ips') return null;
+    if (e.identifierType === 'ruc') return null;
+    if (e.identifierType === 'document') return null;
+    return e.name;
+}
 
 /**
  * View table 4 of `Especificación Técnica para Importación.pdf`
