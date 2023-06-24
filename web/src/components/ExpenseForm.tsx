@@ -138,15 +138,12 @@ export function ExpenseForm({
                                 <Form.Item name="letterhead"
                                            label="Timbrado"
                                            rules={[{required: true}]}>
-                                    <MaskedInput mask="11111111"
-                                                 defaultValue={expense?.letterhead}
-                                                 placeholder="12345678"/>
+
+                                    <Input placeholder="12345678" defaultValue={expense?.letterhead} maxLength={8} minLength={8}/>
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
-                                    <MaskedInput mask="111-111-1111111"
-                                                 defaultValue={expense?.expenseNumber}
-                                                 placeholder="001-002-1234567"/>
+                                    <Input placeholder="001-002-1234567" defaultValue={expense?.expenseNumber} />
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">

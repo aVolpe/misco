@@ -50,8 +50,42 @@ export function doExport(
 }
 
 
+
 function exportExpenses(expenses: Expense[]) {
-    return Papa.unparse(expenses.map(e => ([
+    return Papa.unparse(expenses.map(e => mapExpense(e)).sort((r1, r2) => r1[0] - r2[0]));
+}
+
+
+
+function mapExpense(e: Expense): any[] {
+
+    const type = getDocumentType(e);
+
+    if (type === 'COMPRA') {
+        return [
+            2,
+            mapIdentifierType(e),
+            e.identifier,
+            mapName(e),
+            mapExpenseType(e),
+            mapExpenseDate(e),
+            e.letterhead,
+            e.voucher,
+            e.amount,
+            0,
+            0,
+            e.amount,
+            1,
+            'N',
+            'N',
+            'N',
+            'S',
+            'N',
+            undefined,
+            undefined
+        ]
+    }
+    return [
         4, // 1
         mapExpenseType(e), // 2
         mapExpenseDate(e), // 3
@@ -66,11 +100,16 @@ function exportExpenses(expenses: Expense[]) {
         'N', // no imputa
         null, // numero de cuenta
         null, // banco/financiera/cooperativa
-        e.type === 'ips' ? 292994 : null, // identificacion empleador ips
+        mapIpsEmployerIdentifier(e),// identificacion empleador ips
         null, // especificar tipo de documento
         null, // numero del comprobante de compra asociado
         null, // timbrado del comprobante asociado
-    ])));
+    ];
+}
+
+function getDocumentType(e: Expense) {
+    if (e.type === 'invoice') return 'COMPRA';
+    return 'EGRESO';
 }
 
 function mapName(e: Expense) {
@@ -135,6 +174,11 @@ function mapIdentifierType(e: Expense): number | null {
     }
 }
 
+function mapIpsEmployerIdentifier(e: Expense) {
+    if (e.type !== 'ips') return ;
+    return e.type === 'ips' ? 292994 : null;
+}
+
 
 const VENTAS_COLUMNS = [
     "CÓDIGO TIPO DE REGISTRO",
@@ -176,3 +220,4 @@ const EGRESOS_COLUMNS = [
     "ESPECIFICAR TIPO DE DOCUMENTO",
     "NÚMERO DEL COMPROBANTE DE VENTA ASOCIADO",
     "TIMBRADO DEL COMPROBANTE DE VENTA ASOCIADO"];
+
