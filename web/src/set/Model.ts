@@ -60,7 +60,9 @@ export interface Income {
 
     older?: {
         v1: Ingreso
-    }
+    },
+
+    tags?: Array<string>
 }
 
 export interface Expense {
@@ -108,7 +110,9 @@ export interface Expense {
 
     older?: {
         v1: Egreso
-    }
+    };
+
+    tags?: Array<string>
 }
 
 
