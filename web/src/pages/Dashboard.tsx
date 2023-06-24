@@ -11,6 +11,7 @@ import {ExpenseFormData} from '../components/ExpenseForm';
 import {Person} from '../RucAPI';
 import {DuplicateHelper} from './DuplicateHelper';
 import {BasePage} from '../components/BasePage';
+import {MarangatuConflictHelper} from './MarangatuConfilctHelper';
 
 
 export function Dashboard() {
@@ -90,6 +91,9 @@ export function Dashboard() {
                       </Tabs.TabPane>
                       <Tabs.TabPane tab="Egresos duplicados" key="3">
                           <DuplicateHelper expenses={state.expenses} onRemove={state.removeExpense}/>
+                      </Tabs.TabPane>
+                      <Tabs.TabPane tab="Conflictos con marangatu" key="4">
+                          <MarangatuConflictHelper />
                       </Tabs.TabPane>
                   </Tabs>}
         > {state.informer && <Informer informer={state.informer}/>} </BasePage>
