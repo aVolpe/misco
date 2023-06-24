@@ -4,16 +4,34 @@ import {useEffect, useMemo, useState} from 'react';
 import {VersionMigrator} from './set/VersionMigrator';
 import {Person} from './RucAPI';
 import {ExpenseFormData} from './components/ExpenseForm';
-import {SETService} from './set/SETService';
+import {PersonWithLetterhead, SETService} from './set/SETService';
 import {IncomeFormData} from './components/IncomeForm';
 
 
 const vm = new VersionMigrator();
 
+export type MiscoState = {
+    isMigrating: boolean,
+    expenses: Expense[],
+    saveExpense: (expense: ExpenseFormData, id?: number) => { wasNew: boolean },
+    updateExpense: (expense: Expense) => void,
+    addExpenses: (expense: ExpenseFormData[]) => void,
+    removeExpense: (id: number) => void,
+    removeIncome: (id: number) => void,
+    clearAllData: () => void,
+    informer: User,
+    owner: Person,
+    period: number,
+    incomes: Income[],
+    saveIncome: (income: IncomeFormData, id?: number) => { wasNew: boolean }
+    searchRuc: (ruc: string) => Promise<PersonWithLetterhead>
+}
+
+
 /**
  * Handles all the state of the site, currently it can be only used one time (for the migration flag)
  */
-export function useMiscoState() {
+export function useMiscoState(): MiscoState {
 
     const [informer, setInformer, clearInformer] = useLocalStorage<User>('informante');
     const [incomes, setIncomes, clearIncomes] = useLocalStorage<Income[]>('ingresos', []);
@@ -80,6 +98,12 @@ export function useMiscoState() {
         }
     }
 
+    function updateExpense(toUpdate: Expense) {
+        setExpenses((expenses || []).map(it => {
+            return it.id === toUpdate.id ? toUpdate : it;
+        }));
+    }
+
     function addExpenses(expense: Array<ExpenseFormData>) {
         setExpenses([...(expenses || []), ...(expense.map(i => service.mapInvoice(i)))]);
     }
@@ -127,10 +151,12 @@ export function useMiscoState() {
         removeIncome,
 
         incomes: incomes || [],
-        informer: informer,
+        informer: informer!,
         clearAllData,
         owner,
         period,
-        searchRuc
+        searchRuc,
+
+        updateExpense
     }
 }
