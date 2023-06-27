@@ -6,12 +6,12 @@ import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(isBetween);
 
-type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher' | 'tags'> & {
+type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher' | 'tags' | 'id'> & {
     type: keyof typeof IncomeType | keyof typeof ExpenseDocumentType
 };
 
-const SPECIAL_KEYS: SPECIAL_KEY_TYPES[] = ['type', 'tags', 'tag', 'cat'];
-type SPECIAL_KEY_TYPES = 'type' | 'tags' | 'tag' | 'cat';
+const SPECIAL_KEYS: SPECIAL_KEY_TYPES[] = ['type', 'tags', 'tag', 'cat', 'id'];
+type SPECIAL_KEY_TYPES = 'type' | 'tags' | 'tag' | 'cat' | 'id';
 
 export class SETListManipulatorService {
 
@@ -20,15 +20,20 @@ export class SETListManipulatorService {
         const typeToSearch = this.getTypeToSearch(toSearch);
         const tagToSearch = tags || this.getTagToSearch(toSearch);
         const fullText = this.cleanSearch(toSearch);
+        const idToSearch = this._extractPropertySearch(toSearch, 'id');
         console.log({
             fullText,
             typeToSearch,
+            idToSearch,
             tagToSearch: tagToSearch?.join(","),
             from: from.toString(),
             to: to.toString()
         });
         return data.filter(tf => {
             let valid = true;
+            if (idToSearch) {
+                valid = parseInt(idToSearch) === tf.id;
+            }
             if (valid && fullText)
                 valid = tf.name.toLowerCase().includes(fullText)
                     || tf.identifier.toLowerCase().includes(fullText)
@@ -93,11 +98,9 @@ export class SETListManipulatorService {
             const toClean = `${key}:`;
             if (cleaned.includes(toClean)) {
                 const idx = cleaned.indexOf(toClean);
-                console.log(`before removing '${toClean}': '${cleaned}'`);
                 cleaned =
                     cleaned.substring(0, idx).trim() + // before
                     cleaned.substring(cleaned.indexOf(' ', idx)); // after
-                console.log('cleaned: ' + cleaned);
             }
         }
 
