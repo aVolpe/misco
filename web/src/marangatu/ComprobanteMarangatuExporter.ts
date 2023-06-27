@@ -1,4 +1,4 @@
-import {Expense} from '../set/Model';
+import {Expense, Income} from '../set/Model';
 import Papa from 'papaparse';
 import {SETService} from '../set/SETService';
 import dayjs from 'dayjs';
@@ -16,9 +16,9 @@ export async function doExportToZip(
     date: Date,
     type: ExportData['type'],
     lastIdentifier: number,
-    expenses: Expense[]
+    raw: { expenses: Expense[], incomes: Income[] }
 ): Promise<{ blob: Blob, lastIdentifier: number, fileName: string }> {
-    const data = doExport(identifier, date, type, lastIdentifier, expenses);
+    const data = doExport(identifier, date, type, lastIdentifier, raw);
     const zip = new JSZip();
     zip.file(data.fileName + ".csv", data.data);
     const b = await zip.generateAsync({type: 'blob'});
@@ -34,10 +34,12 @@ export function doExport(
     date: Date,
     type: ExportData['type'],
     lastIdentifier: number,
-    expenses: Expense[]
+    raw: { expenses: Expense[], incomes: Income[] }
 ): ExportData {
 
-    const rows: string = exportExpenses(expenses);
+    let expenses = exportExpenses(raw.expenses);
+    if (expenses.length > 0 && !expenses.endsWith("\n")) expenses += "\n";
+    const rows: string = expenses + exportIncomes(raw.incomes);
 
     return {
         type: type,
@@ -55,6 +57,9 @@ function exportExpenses(expenses: Expense[]) {
     return Papa.unparse(expenses.map(e => mapExpense(e)).sort((r1, r2) => r1[0] - r2[0]));
 }
 
+function exportIncomes(incomes: Income[]) {
+    return Papa.unparse(incomes.map(e => mapIncome(e)).sort((r1, r2) => r1[0] - r2[0]));
+}
 
 
 function mapExpense(e: Expense): any[] {
@@ -63,19 +68,19 @@ function mapExpense(e: Expense): any[] {
 
     if (type === 'COMPRA') {
         return [
-            2,
-            mapIdentifierType(e),
-            e.identifier,
-            mapName(e),
-            mapExpenseType(e),
-            mapExpenseDate(e),
-            e.letterhead,
-            e.voucher,
-            e.amount,
-            0,
-            0,
-            e.amount,
-            1,
+            2, // 1
+            mapIdentifierType(e), // 2
+            e.identifier, // 3
+            mapName(e), // 4
+            mapExpenseType(e), // 5
+            mapExpenseDate(e), // 6
+            e.letterhead, // 7
+            e.voucher, // 8
+            e.amount, // 9
+            0, // 10
+            0, // 11
+            e.amount, // 12
+            1, // CONIDICION DE COMPRA 13
             'N',
             'N',
             'N',
@@ -89,7 +94,7 @@ function mapExpense(e: Expense): any[] {
         4, // 1
         mapExpenseType(e), // 2
         mapExpenseDate(e), // 3
-        e.type === 'ips' || e.type === 'cardSummary' ? null : e.voucher, // 4
+        e.type === 'ips' || e.type === 'cardSummary' || e.type === 'salary' ? null : e.voucher, // 4
         mapIdentifierType(e), // 5
         e.type === 'cardSummary' ? null : e.identifier, // 6
         mapName(e), // 7
@@ -107,13 +112,35 @@ function mapExpense(e: Expense): any[] {
     ];
 }
 
+function mapIncome(i: Income): any[] {
+    if (i.type !== 'salary') throw new Error(`missing mapping for type ${i.type}`);
+    return [
+        3, // 1
+        mapIncomeType(i), // 2
+        mapIncomeDate(i), // 3
+        i.type === 'salary' ? null : i.voucher, // 4
+        mapIdentifierType(i), // 5
+        i.identifier, // 6
+        mapName(i), // 7
+        i.amount, // MONTO GRAVADO 8
+        0, // MONTO NO GRAVADO/EXONERADO 9
+        i.amount, // MONTO TOTAL 10
+        'N', // IRE 11
+        'S', // IRP-RSP 12
+        null, // ESPECIFICAR TIPO DE DOCUMENTO 13
+        null, // NUMERO DE COMPROBANTE DE VENTA ASOCIADO 14
+        null // TIMBRADO DEL COMPROBANTE DE VENTA ASOCIADO 15
+    ]
+}
+
 function getDocumentType(e: Expense) {
     if (e.type === 'invoice') return 'COMPRA';
     return 'EGRESO';
 }
 
-function mapName(e: Expense) {
+function mapName(e: Expense | Income) {
     if (e.type === 'ips') return null;
+    if (e.type === 'salary') return e.name; // always put name if salary
     if (e.identifierType === 'ruc') return null;
     if (e.identifierType === 'document') return null;
     return e.name;
@@ -131,6 +158,13 @@ function mapExpenseType(
     if (e.type === 'publicIncomeTicket') return 204;
     if (e.type === 'cardSummary') return 207;
     throw new Error(`Unmapped type ${e.type} (${e.id})`);
+}
+
+function mapIncomeType(
+    i: Income
+): number {
+    if (i.type === 'salary') return 208;
+    throw new Error(`Unmapped type ${i.type}`);
 }
 
 /**
@@ -151,9 +185,22 @@ function mapExpenseDate(
 }
 
 /**
+ * • Requerido.
+ * • Formato de fecha dd/mm/aaaa, a excepción
+ * de los tipos de comprobantes 208 (LIQUIDACIÓN DE SALARIO) Y 206 (EXTRACTO DE CUENTA DE IPS), en los cuales se debe consignar el periodo con formato mm/aaaa.
+ * • No se permiten fechas anteriores al 01/01/2021.
+ */
+function mapIncomeDate(
+    i: Income
+): string {
+    if (i.type === 'salary') return SETService.mapLocalToMoment(i.date).format('MM/YYYY');
+    throw new Error(`Unmapped type ${i.type} (${i.id})`);
+}
+
+/**
  * View table 3 of `Especificación Técnica para Importación.pdf`
  */
-function mapIdentifierType(e: Expense): number | null {
+function mapIdentifierType(e: Expense | Income): number | null {
     if (e.type === 'ips'
         || e.type === 'cardSummary') return null;
     if (e.type === 'publicIncomeTicket') return 11; // always ruc
@@ -169,13 +216,13 @@ function mapIdentifierType(e: Expense): number | null {
         case 'externalProviderIdentifier':
             return 16;
         case 'employerNumber':
+        default:
             throw new Error(`unsupported type for export ${e.identifierType} (${e.id})`);
-
     }
 }
 
 function mapIpsEmployerIdentifier(e: Expense) {
-    if (e.type !== 'ips') return ;
+    if (e.type !== 'ips') return null;
     return e.type === 'ips' ? 292994 : null;
 }
 
