@@ -43,6 +43,20 @@ export function ExpensePanel(props: {
         };
     }, [props.onSelectionChange]);
 
+    function goNextMonth() {
+        setDate(d => [
+            d[0].startOf('month').add(1, 'month').startOf('month'),
+            d[1].startOf('month').add(1, 'month').endOf('month'),
+        ]);
+    }
+
+    function goPrevMonth() {
+        setDate(d => [
+            d[0].startOf('month').subtract(1, 'month').startOf('month'),
+            d[1].startOf('month').subtract(1, 'month').endOf('month'),
+        ]);
+    }
+
     return <>
         <Row gutter={[8, 8]} align="middle">
             <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}} offset={1}>
@@ -76,6 +90,13 @@ export function ExpensePanel(props: {
                                                 dayjs().endOf('year')
                                             ]
                                         }}
+                                        renderExtraFooter={() => <Space.Compact block style={{
+                                            justifyContent: 'center',
+                                            padding: 2
+                                        }}>
+                                            <Button onClick={goPrevMonth}>Mes ant.</Button>
+                                            <Button onClick={goNextMonth}>Mes sgte.</Button>
+                                        </Space.Compact>}
                                         onChange={values => {
                                             if (!values) return;
                                             setDate([
