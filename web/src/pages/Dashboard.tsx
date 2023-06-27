@@ -64,7 +64,7 @@ export function Dashboard() {
 
     return <>
         <BasePage title="MISCO"
-                  subTitle="Sistema suplementario para Aranduka"
+                  subTitle="Sistema suplementario para Marangatu"
                   extra={[
                       <Button key="import" onClick={() => setClipboardImporter(true)}>Importar</Button>,
                       <Button key="export" onClick={() => setShowExporter(true)}>Exportar</Button>,

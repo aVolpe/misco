@@ -124,6 +124,7 @@ function ExpenseTable(props: {
     selection?: TableRowSelection<Expense>;
     hideActions?: boolean;
 }) {
+
     return <Table<Expense>
         dataSource={props.invoices}
         size="small"

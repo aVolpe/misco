@@ -32,7 +32,7 @@ export function Onboarding() {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
 
 
-    return <BasePage title="MISCO" subTitle="Sistema suplementario para Aranduka">
+    return <BasePage title="MISCO" subTitle="Sistema suplementario para Marangatu">
         <Row gutter={[16, 16]} style={{margin: 16}}>
             <Col span={24}>
                 <Alert message=" Para usar el sistema debes importar datos del Aranduka " type="warning"/>

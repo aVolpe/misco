@@ -54,16 +54,9 @@ function ConflictResolver({data, source}: {
     source: Array<Expense>
 }) {
 
-    const [period, setPeriod] = useState<number>(new Date().getFullYear() - 1);
-    const [selected, setSelection] = useState<Array<Expense>>([]);
     const diff = useMemo(() => calculateDiff(data, source), [data, source]);
-    const [taggerOpen, setTaggerOpen] = useState(false);
 
     return <div>
-        <Tagger data={selected}
-                onCancel={() => setTaggerOpen(false)}
-                open={taggerOpen}/>
-        Tagger? {taggerOpen}
 
         <h1>ConflictResolver</h1>
         <ul>
@@ -72,29 +65,22 @@ function ConflictResolver({data, source}: {
             <li>
                 Cantidad de filas diferentes:
                 <ul>
-                    <li>En fuente {diff.inSource.length}</li>
-                    <li>En importado {diff.inImported.length}</li>
+                    <li>En fuente {diff.notInSource.length}</li>
+                    <li>En importado {diff.notInImported.length}</li>
+                    <li>En ambos {diff.inSourceAndInImported.length}</li>
                 </ul>
             </li>
         </ul>
         <div>
             <Collapse defaultActiveKey={['1']}>
-                <Collapse.Panel header="No encontrados en 'datos locales'" key="1">
-                    <ImportedTable data={diff.inImported}/>
+                <Collapse.Panel header="No encontrados en 'datos locales'" key="NOT_IN_LOCAL">
+                    <ImportedTable data={diff.notInImported}/>
                 </Collapse.Panel>
-                <Collapse.Panel header="No encontrados en 'importados'" key="2">
-                    <Button disabled={selected.length === 0}
-                            onClick={() => setTaggerOpen(true)}>
-                        Agregar tag a {selected.length} items
-                    </Button>
-                    <ExpensePanel data={diff.inSource}
-                                  period={period}
-                                  onSelectionChange={setSelection}
-                                  hideActions={true}
-                                  doRemove={() => console.log('noop')}
-                                  doEdit={() => console.log('noop')}
-
-                    />;
+                <Collapse.Panel header="No encontrados en 'importados'" key="NOT_IN_IMPORTED">
+                    <ExpenseTaggeablePannel data={diff.notInImported}/>
+                </Collapse.Panel>
+                <Collapse.Panel header="Encontrados en 'importados'" key="IN_BOTH">
+                    <ExpenseTaggeablePannel data={diff.inSourceAndInImported}/>
                 </Collapse.Panel>
             </Collapse>
         </div>
@@ -104,7 +90,8 @@ function ConflictResolver({data, source}: {
 function Tagger(props: {
     data: Expense[],
     onCancel: () => void
-    open: boolean }) {
+    open: boolean
+}) {
 
     const [tags, setTags] = useState<string[]>([]);
     const state = useMiscoState();
@@ -165,22 +152,34 @@ function MarangatuExcelImporter(props: {
 }
 
 function calculateDiff(data: ExportedData, source: Array<Expense>): {
-    inSource: Expense[],
-    inImported: Array<Record<COLUMN_NAMES, string>>
+    notInSource: Expense[],
+    notInImported: Array<Record<COLUMN_NAMES, string>>,
+    inSourceAndInImported: Expense[]
 } {
-    const diff = source.filter(e => {
+    const notInSource = source.filter(e => {
         const found = data.Datos.find(d => {
+            if (e.type === 'ips' && d["Tipo de Comprobante"] === "EXTRACTO DE CUENTA IPS")
+                return parseInt(d["Total Comprobante"]) === e.amount;
             return d["Número de Comprobante"] === e.voucher;
         });
         return !found;
     });
-    const inImported = data.Datos.filter(e => {
+    const inSourceAndInImported = source.filter(e => {
+        return data.Datos.find(d => {
+            if (e.type === 'ips' && d["Tipo de Comprobante"] === "EXTRACTO DE CUENTA IPS")
+                return parseInt(d["Total Comprobante"]) === e.amount;
+            return d["Número de Comprobante"] === e.voucher;
+        });
+    });
+    const notInImported = data.Datos.filter(e => {
         const found = source.find(d => {
+            if (d.type === 'ips' && e["Tipo de Comprobante"] === "EXTRACTO DE CUENTA IPS")
+                return parseInt(e["Total Comprobante"]) === d.amount;
             return d.voucher == e["Número de Comprobante"];
         });
         return !found;
     });
-    return {inSource: diff, inImported};
+    return {notInSource, notInImported, inSourceAndInImported};
 }
 
 function ImportedTable(props: { data: Array<Record<COLUMN_NAMES, string>> }) {
@@ -188,3 +187,29 @@ function ImportedTable(props: { data: Array<Record<COLUMN_NAMES, string>> }) {
                       data={props.data}/>;
 }
 
+function ExpenseTaggeablePannel(props: {
+    data: Array<Expense>
+}) {
+
+    const [period, setPeriod] = useState<number>(new Date().getFullYear() - 1);
+    const [selected, setSelection] = useState<Array<Expense>>([]);
+    const [taggerOpen, setTaggerOpen] = useState(false);
+
+    return <>
+        <Tagger data={selected}
+                onCancel={() => setTaggerOpen(false)}
+                open={taggerOpen}/>
+        <Button disabled={selected.length === 0}
+                onClick={() => setTaggerOpen(true)}>
+            Agregar tag a {selected.length} items
+        </Button>
+        <ExpensePanel data={props.data}
+                      period={period}
+                      onSelectionChange={setSelection}
+                      hideActions={true}
+                      doRemove={() => console.log('noop')}
+                      doEdit={() => console.log('noop')}
+
+        />;
+    </>;
+}
