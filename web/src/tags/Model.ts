@@ -13,6 +13,9 @@ export const ALL_TAGS: Array<MiscoTag> = [{
 }, {
     id: 'FIXED_PENDING_UPLOAD',
     label: "Corregido localmente"
+}, {
+    id: 'REGISTERED',
+    label: "Registrado en marangatu"
 }];
 
 export const TAGS_LOOKUP: Record<string, string> = ALL_TAGS.reduce((acc, t) => ({
