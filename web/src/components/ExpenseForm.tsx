@@ -100,11 +100,10 @@ export function ExpenseForm({
                 <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}}>
 
                     <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
-                        <MaskedInput mask="11/11/11"
-                                     ref={refDate}
-                                     autoFocus
-                                     placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
-                                     defaultValue={expense?.date}/>
+                        <Input ref={refDate}
+                               autoFocus
+                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
+                               defaultValue={expense?.date}/>
                     </Form.Item>
 
                     <Form.Item label="Tipo egreso" name="type">
@@ -141,11 +140,13 @@ export function ExpenseForm({
                                            label="Timbrado"
                                            rules={[{required: true}]}>
 
-                                    <Input placeholder="12345678" defaultValue={expense?.letterhead} maxLength={8} minLength={8}/>
+                                    <Input placeholder="12345678" defaultValue={expense?.letterhead} maxLength={8}
+                                           minLength={8}/>
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
-                                    <Input placeholder="001-002-1234567" defaultValue={expense?.expenseNumber} />
+                                    <Input placeholder="001-002-1234567" defaultValue={expense?.expenseNumber}
+                                           minLength={15} maxLength={15}/>
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">
