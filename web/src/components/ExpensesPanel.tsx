@@ -125,12 +125,16 @@ function ExpenseTable(props: {
     hideActions?: boolean;
 }) {
 
+    const [pagination, setPagination] = useState<{page: number, pageSize: number}>({page: 1, pageSize: 10});
+
     return <Table<Expense>
         dataSource={props.invoices}
         size="small"
         rowSelection={props.selection}
         pagination={{
-            pageSize: 10,
+            pageSizeOptions: [10, 20, 30, 100],
+            pageSize: pagination.pageSize,
+            onChange: (p, ps) => setPagination({page: p, pageSize: ps}),
             showTotal: (t, r) => `Mostrando ${r[0]} a ${r[1]} de ${t} registros.`
         }}
         rowKey="id"

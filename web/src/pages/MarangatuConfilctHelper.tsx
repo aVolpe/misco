@@ -77,7 +77,7 @@ function ConflictResolver({data, source}: {
                     <ImportedTable data={diff.notInImported}/>
                 </Collapse.Panel>
                 <Collapse.Panel header="No encontrados en 'importados'" key="NOT_IN_IMPORTED">
-                    <ExpenseTaggeablePannel data={diff.notInImported}/>
+                    <ExpenseTaggeablePannel data={diff.notInSource}/>
                 </Collapse.Panel>
                 <Collapse.Panel header="Encontrados en 'importados'" key="IN_BOTH">
                     <ExpenseTaggeablePannel data={diff.inSourceAndInImported}/>

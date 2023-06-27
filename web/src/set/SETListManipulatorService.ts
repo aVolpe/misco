@@ -15,10 +15,10 @@ type SPECIAL_KEY_TYPES = 'type' | 'tags' | 'tag' | 'cat' | 'id';
 
 export class SETListManipulatorService {
 
-    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs, tags?: string[]): T[] {
+    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs, tags: string[] = []): T[] {
         const toSearch = (query || '');
         const typeToSearch = this.getTypeToSearch(toSearch);
-        const tagToSearch = tags || this.getTagToSearch(toSearch);
+        const tagToSearch = [...tags, ...this.getTagToSearch(toSearch)];
         const fullText = this.cleanSearch(toSearch);
         const idToSearch = this._extractPropertySearch(toSearch, 'id');
         console.log({
@@ -73,10 +73,10 @@ export class SETListManipulatorService {
         return this._extractPropertySearch(toSearch, "type")
     }
 
-    getTagToSearch(toSearch: string): string[] | undefined {
+    getTagToSearch(toSearch: string): string[] {
         const val = this._extractPropertySearch(toSearch, 'tag')
             || this._extractPropertySearch(toSearch, 'tags');
-        return val?.toUpperCase().split(",")
+        return val?.toUpperCase().split(",") || [];
     }
 
     _extractPropertySearch(toSearch: string, key: SPECIAL_KEY_TYPES): string | undefined {
