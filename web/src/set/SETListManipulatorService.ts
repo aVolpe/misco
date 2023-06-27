@@ -10,15 +10,15 @@ type Filtrable = Pick<Income, 'identifier' | 'name' | 'date' | 'voucher' | 'tags
     type: keyof typeof IncomeType | keyof typeof ExpenseDocumentType
 };
 
-const SPECIAL_KEYS: SPECIAL_KEY_TYPES[] = ['type', 'tags', 'tag'];
-type SPECIAL_KEY_TYPES = 'type' | 'tags' | 'tag';
+const SPECIAL_KEYS: SPECIAL_KEY_TYPES[] = ['type', 'tags', 'tag', 'cat'];
+type SPECIAL_KEY_TYPES = 'type' | 'tags' | 'tag' | 'cat';
 
 export class SETListManipulatorService {
 
-    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): T[] {
+    private filter<T extends Filtrable>(data: Array<T>, query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs, tags?: string[]): T[] {
         const toSearch = (query || '');
         const typeToSearch = this.getTypeToSearch(toSearch);
-        const tagToSearch = this.getTagToSearch(toSearch);
+        const tagToSearch = tags || this.getTagToSearch(toSearch);
         const fullText = this.cleanSearch(toSearch);
         console.log({
             fullText,
@@ -29,7 +29,7 @@ export class SETListManipulatorService {
         });
         return data.filter(tf => {
             let valid = true;
-            if (fullText)
+            if (valid && fullText)
                 valid = tf.name.toLowerCase().includes(fullText)
                     || tf.identifier.toLowerCase().includes(fullText)
                     || (tf.voucher || '').toLowerCase().includes(fullText);
@@ -46,7 +46,7 @@ export class SETListManipulatorService {
             }
             if (tagToSearch && valid) {
                 const tags = tf.tags || [];
-                valid = tagToSearch.some(tag => {
+                valid = tagToSearch.filter(tag => {
                     const tagName = tag.startsWith("!")
                         ? tag.substring(1)
                         : tag;
@@ -54,10 +54,14 @@ export class SETListManipulatorService {
                         // negative search, in the case the tag must not be present
                         ? !tags.find(t => t === tagName)
                         : tags.find(t => t === tagName);
-                });
+                }).length === tagToSearch.length;
             }
             return valid
         })
+    }
+
+    getCatToSearch(toSearch: string): string | undefined {
+        return this._extractPropertySearch(toSearch, "cat")
     }
 
     getTypeToSearch(toSearch: string): string | undefined {
@@ -73,7 +77,7 @@ export class SETListManipulatorService {
     _extractPropertySearch(toSearch: string, key: SPECIAL_KEY_TYPES): string | undefined {
         let query = toSearch.toLowerCase().trim() + ' ';
         const fullKey = key + ":";
-        if (query.includes(key)) {
+        if (query.includes(fullKey)) {
             const idx = query.indexOf(fullKey) + fullKey.length;
             return query.substring(idx, query.indexOf(' ', idx));
         }
@@ -100,11 +104,35 @@ export class SETListManipulatorService {
         return cleaned.trim();
     }
 
+    filterAll(expenses: Expense[], incomes: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): {
+        incomes: Income[],
+        expenses: Expense[]
+    } {
+        const cat = this.getCatToSearch(query || '');
+        if (!cat) return {
+            expenses: this.filterExpenses(expenses, query, from, to),
+            incomes: this.filterIncomes(incomes, query, from, to)
+        }
+        if (cat.startsWith('income')) {
+            return {
+                incomes: this.filterIncomes(incomes, query, from, to),
+                expenses: []
+            }
+        }
+        if (cat.startsWith('expense')) {
+            return {
+                incomes: [],
+                expenses: this.filterExpenses(expenses, query, from, to)
+            }
+        }
+        throw new Error(`invalid category: ${cat}`);
+    }
+
     filterIncomes(data: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): Income[] {
         return this.filter(data, query, from, to);
     }
 
-    filterExpenses(data: Expense[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): Expense[] {
-        return this.filter(data, query, from, to);
+    filterExpenses(data: Expense[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs, tags?: string[]): Expense[] {
+        return this.filter(data, query, from, to, tags);
     }
 }

@@ -8,7 +8,7 @@ import {TableRowSelection} from 'antd/es/table/interface';
 import {ExpenseDocumentType, PaymentType} from '../set/V2Enums';
 import {formatMoney} from '../utils/formatters';
 import {sumBy} from 'lodash';
-import {MiscoTag} from '../tags/MiscoTag';
+import {MiscoTag, TagBar} from '../tags/MiscoTag';
 
 export function ExpensePanel(props: {
     period: number;
@@ -26,10 +26,11 @@ export function ExpensePanel(props: {
         dayjs().year(props.period).endOf('year').endOf('day'),
     ]);
     const [data, setData] = useState<Expense[]>(props.data);
+    const [tags, setTags] = useState<string[]>([]);
 
     useEffect(() => {
-        setData(new SETListManipulatorService().filterExpenses(props.data, debouncedQuery, date[0], date[1]))
-    }, [debouncedQuery, props.data, date]);
+        setData(new SETListManipulatorService().filterExpenses(props.data, debouncedQuery, date[0], date[1], tags))
+    }, [debouncedQuery, props.data, date, tags]);
 
     const selection: TableRowSelection<Expense> | undefined = useMemo(() => {
         if (!props.onSelectionChange) return undefined;
@@ -50,7 +51,9 @@ export function ExpensePanel(props: {
             <Col span={9}>
                 <Input placeholder="Por ruc/nombre/nro factura"
                        value={query}
+                       style={{width: '100%'}}
                        onChange={t => setQuery(t.target.value)}/>
+                <TagBar onChanged={setTags}/>
             </Col>
             <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}}>
                 Rango:
