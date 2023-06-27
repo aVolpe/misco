@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useLocalStorage} from '@rehooks/local-storage';
-import {App, Button, Col, DatePicker, Row} from 'antd';
+import {App, Button, Col, DatePicker, Input, Row} from 'antd';
 import {Expense, Income, User} from "../set/Model";
 import {SETExporter} from "../set/SETExporter";
 import dayjs, {Dayjs} from 'dayjs';
@@ -30,28 +30,33 @@ export function Exporter() {
         new SETExporter().downloadExcel(informer!, 'egresos', expenses!);
     }
 
-    function downloadRequirement(date: Dayjs, type: 'MENSUAL' | 'ANUAL') {
+    function downloadRequirement(date: Dayjs, type: 'MENSUAL' | 'ANUAL', query?: string) {
         message.loading({content: 'Obteniendo registros', key: '955'});
         const filteredExpenses = new SETListManipulatorService()
-            .filterExpenses(expenses, undefined,
+            .filterAll(
+                expenses,
+                incomes,
+                query,
                 date.startOf(type === 'MENSUAL' ? 'month' : 'year'),
                 date.endOf(type === 'MENSUAL' ? 'month' : 'year'));
 
-        message.loading({content: 'Generando archivo', key: '955'});
+        const size = filteredExpenses.incomes.length + filteredExpenses.expenses.length;
+
+        message.loading({content: `Generando archivo con ${size} registros`, key: '955'});
         const identifier = informer?.identifier!;
         return doExportToZip(identifier.substring(0, identifier.indexOf('-')), date.toDate(), type, marangatuExportData, filteredExpenses)
             .then(z => {
-                message.loading({content: `Descargando ${z.fileName}`, key: '955'});
+                message.loading({content: `Descargando ${z.fileName} de ${size} registros`, key: '955'});
                 setMarangatuExportData(z.lastIdentifier);
                 FileSaver.saveAs(z.blob, z.fileName);
                 return z.fileName;
             })
             .then(fn => {
-                message.success({content: `Archivo ${fn} guardado`, key: '955', duration: 5});
+                message.success({content: `Archivo ${fn} guardado (con ${size} registros)`, key: '955', duration: 5});
             })
             .catch(e => {
                 console.warn(e);
-                message.error({content: `No se puede guardar el archivo (${e})`, key: '955', duration: 15});
+                message.error({content: `No se puede guardar el archivo (${e}) (con ${size} registros)`, key: '955', duration: 15});
             });
     }
 
@@ -121,7 +126,7 @@ export function Exporter() {
                         <br/>
                         <small>Todos los comprobantes, para ser importados a Marangatu</small>
                     </td>
-                    <Download956 download956={d => downloadRequirement(d, 'ANUAL')}/>
+                    <Download956 download956={(d, query) => downloadRequirement(d, 'ANUAL', query)}/>
                 </tr>
                 </tbody>
             </table>
@@ -146,16 +151,20 @@ function Download955(props: {
 }
 
 function Download956(props: {
-    download956: (d: Dayjs) => void
+    download956: (d: Dayjs, query?: string) => void
 }) {
     const [date, setDate] = useState(dayjs().add(-1, 'y'));
+    const [query, setQuery] = useState('');
 
     return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
+        <Input value={query}
+               placeholder="Filtro opcional"
+               onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
         <DatePicker value={date}
                     style={{width: '100%'}}
                     onChange={d => setDate(d!)}
                     format="YYYY"
                     picker="year"/>
-        <Button onClick={() => props.download956(date)} style={{width: '100%'}}>Exportar</Button>
+        <Button onClick={() => props.download956(date, query)} style={{width: '100%'}}>Exportar</Button>
     </td>
 }

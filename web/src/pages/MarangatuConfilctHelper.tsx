@@ -111,12 +111,10 @@ function Tagger(props: {
     const {message} = App.useApp();
 
     function onOk() {
-        props.data.forEach(e => {
-            state.updateExpense({
-                ...e,
-                tags: uniq([...(e.tags || []), ...tags])
-            })
-        });
+        state.updateExpenses(props.data.map(e => ({
+            ...e,
+            tags: uniq([...(e.tags || []), ...tags])
+        })))
         message.success('Tags agregados', 5);
         props.onCancel();
     }
@@ -126,7 +124,7 @@ function Tagger(props: {
                   onCancel={props.onCancel}
                   okButtonProps={{disabled: tags.length === 0}}>
         <h1>Filas a tagear:</h1>
-        <JsonTable rowKey="voucher" data={props.data}/>
+        <JsonTable rowKey="id" data={props.data}/>
         <hr/>
         Tag a aplicar:
         <Select
