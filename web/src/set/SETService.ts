@@ -43,7 +43,8 @@ export class SETService {
             expenseNumber: source.voucher,
             letterhead: source.letterhead,
             date: SETService.storageToFormDate(source.date),
-            isCredit: source.paymentType === 'credit'
+            isCredit: source.paymentType === 'credit',
+            tags: source.tags
         }
     }
 
@@ -65,11 +66,11 @@ export class SETService {
         };
     }
 
-    mapInvoice(source: ExpenseFormData, id?: number): Expense {
+    mapInvoice(source: ExpenseFormData, previous?: Expense): Expense {
 
         return {
             date: SETService.dateToStorageFormat(source.date),
-            id: id || ++this.lastInvoiceId,
+            id: previous?.id || ++this.lastInvoiceId,
             paymentType: source.isCredit ? 'credit' : 'cash',
             voucher: source.expenseNumber,
             letterhead: source.letterhead,
@@ -79,7 +80,8 @@ export class SETService {
             name: source.owner.name,
             irpAmount: 0,
             identifierType: 'ruc',
-            version: 2
+            version: 2,
+            tags: source.tags || previous?.tags
         };
     }
 

@@ -4,9 +4,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
-import MaskedInput from 'antd-mask-input/build/main/lib/MaskedInput';
 import {PersonWithLetterhead} from '../set/SETService';
 import {ExpenseDocumentType} from "../set/V2Enums";
+import {AS_OPTIONS} from '../tags/Model';
 
 export interface ExpenseFormProps {
     expense?: ExpenseFormData,
@@ -25,6 +25,7 @@ export interface ExpenseFormData {
     type: keyof typeof ExpenseDocumentType;
     amount: number;
     isCredit: boolean;
+    tags?: string[];
 }
 
 export function ExpenseForm({
@@ -76,7 +77,8 @@ export function ExpenseForm({
             expenseNumber: data.expenseNumber,
             owner: finalOwner,
             type: data.type,
-            isCredit: data.isCredit
+            isCredit: data.isCredit,
+            tags: data.tags
         });
         if (refDate.current) refDate.current.focus();
         setRucQuery('');
@@ -164,6 +166,15 @@ export function ExpenseForm({
                         />
                     </Form.Item>
 
+                    <Form.Item label="Tags" name="tags">
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            style={{width: '100%'}}
+                            placeholder="Elija un tag (no es requerido"
+                            options={AS_OPTIONS}
+                        />
+                    </Form.Item>
 
                     <pre hidden>{JSON.stringify(expense?.type, null, 2)}</pre>
 
