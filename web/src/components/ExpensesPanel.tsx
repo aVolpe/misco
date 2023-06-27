@@ -194,7 +194,7 @@ function ExpenseTable(props: {
                 <th colSpan={3}>Total (todas las filas)</th>
                 <td colSpan={2}/>
                 <td className="ant-table-cell" style={{textAlign: 'right', padding: 8}}>
-                    <Typography.Text>{formatMoney(sum)}</Typography.Text>
+                    <Typography.Text copyable={{text: sum.toString()}}>{formatMoney(sum)}</Typography.Text>
                 </td>
                 <td/>
             </tr>
