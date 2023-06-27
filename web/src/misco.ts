@@ -15,6 +15,7 @@ export type MiscoState = {
     expenses: Expense[],
     saveExpense: (expense: ExpenseFormData, id?: number) => { wasNew: boolean },
     updateExpense: (expense: Expense) => void,
+    updateExpenses: (expense: Expense[]) => void,
     addExpenses: (expense: ExpenseFormData[]) => void,
     removeExpense: (id: number) => void,
     removeIncome: (id: number) => void,
@@ -88,11 +89,11 @@ export function useMiscoState(): MiscoState {
     function saveExpense(expense: ExpenseFormData, id?: number): { wasNew: boolean } {
         if (id) {
             setExpenses((expenses || []).map(it => {
-                return it.id === id ? service.mapInvoice(expense, id) : it;
+                return it.id === id ? service.mapInvoice(expense, it) : it;
             }));
             return {wasNew: false};
         } else {
-            // it's a new
+            // it's a new expense
             setExpenses([...(expenses || []), service.mapInvoice(expense)]);
             return {wasNew: true};
         }
@@ -101,6 +102,13 @@ export function useMiscoState(): MiscoState {
     function updateExpense(toUpdate: Expense) {
         setExpenses((expenses || []).map(it => {
             return it.id === toUpdate.id ? toUpdate : it;
+        }));
+    }
+
+    function updateExpenses(expensesToUpdate: Expense[]) {
+        setExpenses((expenses || []).map(it => {
+            const toUpdate = expensesToUpdate.find(i => i.id === it.id);
+            return toUpdate ?? it;
         }));
     }
 
@@ -157,6 +165,7 @@ export function useMiscoState(): MiscoState {
         period,
         searchRuc,
 
-        updateExpense
+        updateExpense,
+        updateExpenses
     }
 }
