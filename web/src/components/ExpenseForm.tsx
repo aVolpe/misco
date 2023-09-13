@@ -1,5 +1,5 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Col, Form, Input, InputNumber, InputRef, Radio, Row, Select} from 'antd';
+import {Button, Col, Form, Input, InputNumber, InputRef, Radio, Row, Select, Space} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
@@ -97,13 +97,18 @@ export function ExpenseForm({
                 <h1>{editType === 'EDIT' ? 'Editando' : 'Creando'}</h1>
             </Col>
             <Col span={24}>
-                <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}}>
+                <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}} initialValues={{
+                    date: expense?.date,
+                    letterhead: expense?.letterhead,
+                    expenseNumber: expense?.expenseNumber,
+                    isCredit: expense?.isCredit || false,
+                    amount: expense?.amount
+                }}>
 
                     <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
                         <Input ref={refDate}
                                autoFocus
-                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
-                               defaultValue={expense?.date}/>
+                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"/>
                     </Form.Item>
 
                     <Form.Item label="Tipo egreso" name="type">
@@ -116,17 +121,17 @@ export function ExpenseForm({
                     <Form.Item label="Buscar por RUC">
                         <Input placeholder="4787587, Arturo Volpe, ASISMED"
                                onKeyDown={evt => onRucInput(evt.key)}
-                               value={rucQuery}
                                defaultValue={expense?.owner.doc}
+                               value={rucQuery}
                                onBlur={evt => {
                                    onNewRuc(evt.target.value);
                                }}
                                onChange={evt => setRucQuery(evt.target.value)}
                         />
-                        <Row>
-                            <Col>Nombre: {finalOwner.name}</Col>
-                            <Col>RUC: {finalOwner.doc}-{finalOwner.div}</Col>
-                        </Row>
+                        <Space direction="horizontal">
+                            <span>Nombre: {finalOwner.name}</span>
+                            <span>RUC: {finalOwner.doc}-{finalOwner.div}</span>
+                        </Space>
                     </Form.Item>
 
                     <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.type !== curValues.type}>
@@ -140,17 +145,18 @@ export function ExpenseForm({
                                            label="Timbrado"
                                            rules={[{required: true}]}>
 
-                                    <Input placeholder="12345678" defaultValue={expense?.letterhead} maxLength={8}
+                                    <Input placeholder="12345678"
+                                           maxLength={8}
                                            minLength={8}/>
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
-                                    <Input placeholder="001-002-1234567" defaultValue={expense?.expenseNumber}
+                                    <Input placeholder="001-002-1234567"
                                            minLength={15} maxLength={15}/>
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">
-                                    <Radio.Group defaultValue={expense?.isCredit}>
+                                    <Radio.Group>
                                         <Radio.Button value={true}>CRÉDITO</Radio.Button>
                                         <Radio.Button value={false}>CONTADO</Radio.Button>
                                     </Radio.Group>
@@ -160,8 +166,7 @@ export function ExpenseForm({
                     </Form.Item>
 
                     <Form.Item label="Monto" name="amount" rules={[{required: true}]}>
-                        <InputNumber defaultValue={expense?.amount}
-                                     style={{width: '100%'}}
+                        <InputNumber style={{width: '100%'}}
                                      formatter={a => formatMoney(a)}
                                      parser={parseMoney}
                         />

@@ -3,12 +3,13 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {useDebounce} from '../utils/Hooks';
 import dayjs from 'dayjs';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
-import {Button, Col, DatePicker, Input, Row, Space, Table, Typography} from 'antd';
+import {Button, Col, DatePicker, Input, Row, Space, Switch, Table, Typography} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {ExpenseDocumentType, PaymentType} from '../set/V2Enums';
 import {formatMoney} from '../utils/formatters';
 import {sumBy} from 'lodash';
 import {MiscoTag, TagBar} from '../tags/MiscoTag';
+import {SETService} from '../set/SETService';
 
 export function ExpensePanel(props: {
     period: number;
@@ -27,6 +28,7 @@ export function ExpensePanel(props: {
     ]);
     const [data, setData] = useState<Expense[]>(props.data);
     const [tags, setTags] = useState<string[]>([]);
+    const [showCopy, setShowCopy] = useState<boolean>(false);
 
     useEffect(() => {
         setData(new SETListManipulatorService().filterExpenses(props.data, debouncedQuery, date[0], date[1], tags))
@@ -65,6 +67,7 @@ export function ExpensePanel(props: {
             <Col span={9}>
                 <Input placeholder="Por ruc/nombre/nro factura"
                        value={query}
+                       allowClear
                        style={{width: '100%'}}
                        onChange={t => setQuery(t.target.value)}/>
                 <TagBar onChanged={setTags}/>
@@ -111,8 +114,14 @@ export function ExpensePanel(props: {
             <ExpenseTable invoices={data}
                           selection={selection}
                           hideActions={props.hideActions}
+                          showCopy={showCopy}
                           onRemove={r => props.doRemove(r.id)}
                           onEdit={props.doEdit}/>
+        </Row>
+        <Row style={{paddingTop: 5}}>
+            <Col>
+                Mostrar copiar: <Switch checkedChildren="Sí" unCheckedChildren="No" onChange={setShowCopy}/>
+            </Col>
         </Row>
     </>
 }
@@ -121,11 +130,12 @@ function ExpenseTable(props: {
     invoices: Expense[]
     onEdit(row: Expense): void;
     onRemove(row: Expense): void;
+    showCopy: boolean;
     selection?: TableRowSelection<Expense>;
     hideActions?: boolean;
 }) {
 
-    const [pagination, setPagination] = useState<{page: number, pageSize: number}>({page: 1, pageSize: 10});
+    const [pagination, setPagination] = useState<{ page: number, pageSize: number }>({page: 1, pageSize: 10});
 
     return <Table<Expense>
         dataSource={props.invoices}
@@ -162,27 +172,30 @@ function ExpenseTable(props: {
             title: 'Fecha',
             dataIndex: 'date',
             sorter: (a, b) => a.date.localeCompare(b.date),
+            render: (d) => <Typography.Text
+                copyable={props.showCopy && {text: SETService.mapLocalToMoment(d).format("DD/MM/YYYY")}}>{d}</Typography.Text>
         }, {
             title: 'Emisor',
             dataIndex: 'identifier',
             align: 'left',
             sorter: (a, b) => a.name.localeCompare(b.name),
             render: (_, row) => <>
-                {row.name} ({row.identifier})
+                {row.name} (<Typography.Text copyable={props.showCopy}>{row.identifier}</Typography.Text>)
             </>
         }, {
             title: 'Factura',
             dataIndex: 'voucher',
             align: 'right',
             render: (_, row) => <>
-                {row.voucher}
-                <br/><small>{row.letterhead}</small>
+                <Typography.Text copyable={props.showCopy}>{row.voucher}</Typography.Text>
+                <br/><Typography.Text copyable={props.showCopy}>{row.letterhead}</Typography.Text>
             </>
         }, {
             title: 'Monto',
             align: 'right',
             dataIndex: 'amount',
-            render: (a: number) => formatMoney(a),
+            render: (a: number) => <Typography.Text
+                copyable={props.showCopy && {text: a.toString()}}>{formatMoney(a)}</Typography.Text>,
             sorter: (a, b) => a.amount - b.amount,
         }, props.hideActions === true ? {} : {
             title: 'Acciones', dataIndex: '', render: (_, row) => {

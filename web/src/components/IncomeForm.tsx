@@ -4,7 +4,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
-import MaskedInput from 'antd-mask-input/build/main/lib/MaskedInput';
 import {PersonWithLetterhead} from '../set/SETService';
 import {IncomeType} from "../set/V2Enums";
 
@@ -96,14 +95,16 @@ export function IncomeForm({
                 <h1>{editType === 'EDIT' ? 'Editando' : 'Nuevo ingreso'}</h1>
             </Col>
             <Col span={24}>
-                <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}}>
+                <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}} initialValues={{
+                    date: income?.date,
+                    letterhead: income?.letterhead,
+                    incomeNumber: income?.incomeNumber
+                }}>
 
                     <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
-                        <MaskedInput mask="11/11/11"
-                                     ref={refDate}
-                                     autoFocus
-                                     placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
-                                     defaultValue={income?.date}/>
+                        <Input ref={refDate}
+                               autoFocus
+                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"/>
                     </Form.Item>
 
                     <Form.Item label="Tipo ingreso" name="type">
@@ -137,15 +138,14 @@ export function IncomeForm({
                                 <Form.Item name="letterhead"
                                            label="Timbrado"
                                            rules={[{required: true}]}>
-                                    <MaskedInput mask="11111111"
-                                                 defaultValue={income?.letterhead}
-                                                 placeholder="12345678"/>
+                                    <Input placeholder="12345678"
+                                           maxLength={8}
+                                           minLength={8}/>
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="incomeNumber" rules={[{required: true}]}>
-                                    <MaskedInput mask="111-111-1111111"
-                                                 defaultValue={income?.incomeNumber}
-                                                 placeholder="001-002-1234567"/>
+                                    <Input placeholder="001-002-1234567"
+                                           minLength={15} maxLength={15}/>
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">

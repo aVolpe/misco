@@ -606,13 +606,6 @@ ansi-styles@^4.1.0:
     "@types/color-name" "^1.1.1"
     color-convert "^2.0.1"
 
-antd-mask-input@^2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/antd-mask-input/-/antd-mask-input-2.0.7.tgz#202d706eb83571646835bf52e9bfe1d1e4ea5eaf"
-  integrity sha512-EFv/Hjar5nzYuzvgCcIeEcbVzw5+4RynUQTl2S8bLMaR9iajiWoeV/VYvENaP6X+ytnM0OqemE2pHY9ZRR6hEw==
-  dependencies:
-    imask "6.4.2"
-
 antd@^5.5.2:
   version "5.5.2"
   resolved "https://registry.yarnpkg.com/antd/-/antd-5.5.2.tgz#075bf006ad0d7f077fa48097e6f96cc968e843f1"
@@ -968,11 +961,6 @@ has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
-
-imask@6.4.2:
-  version "6.4.2"
-  resolved "https://registry.yarnpkg.com/imask/-/imask-6.4.2.tgz#f1c67e6961640bf5b09d7b4a34dcf4f9a3df7e22"
-  integrity sha512-xvEgbTdk6y2dW2UAysq0NRPmO6PuaXM5NHIt4TXEJEwXUHj26M0p/fXqyrSJdNXFaGVOtqYjPRnNdrjQQhDuuA==
 
 immediate@~3.0.5:
   version "3.0.6"
