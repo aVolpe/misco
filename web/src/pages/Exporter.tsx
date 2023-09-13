@@ -39,6 +39,7 @@ export function Exporter() {
                 query,
                 date.startOf(type === 'MENSUAL' ? 'month' : 'year'),
                 date.endOf(type === 'MENSUAL' ? 'month' : 'year'));
+        console.log(`${type} - Query: ${query} - Period ${date} - To export: ${filteredExpenses.incomes.length} incomes and ${filteredExpenses.expenses.length} expenses`);
 
         const size = filteredExpenses.incomes.length + filteredExpenses.expenses.length;
 
@@ -118,7 +119,7 @@ export function Exporter() {
                         <br/>
                         <small>Todos los comprobantes, para ser importados a Marangatu</small>
                     </td>
-                    <Download955 download955={d => downloadRequirement(d, 'MENSUAL')}/>
+                    <Download955 download955={(d, query) => downloadRequirement(d, 'MENSUAL', query)}/>
                 </tr>
                 <tr>
                     <td>
@@ -136,17 +137,21 @@ export function Exporter() {
 }
 
 function Download955(props: {
-    download955: (d: Dayjs) => void
+    download955: (d: Dayjs, query?: string) => void
 }) {
-    const [date, setDate] = useState(dayjs().add(-1, 'y'));
+    const [date, setDate] = useState(dayjs().add(-1, 'm'));
+    const [query, setQuery] = useState('');
 
     return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
+        <Input value={query}
+               placeholder="Filtro opcional"
+               onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
         <DatePicker value={date}
                     style={{width: '100%'}}
                     onChange={d => setDate(d!)}
                     format={monthFormat}
                     picker="month"/>
-        <Button onClick={() => props.download955(date)} style={{width: '100%'}}>Exportar</Button>
+        <Button onClick={() => props.download955(date, query)} style={{width: '100%'}}>Exportar</Button>
     </td>
 }
 

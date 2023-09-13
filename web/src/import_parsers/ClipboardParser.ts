@@ -20,7 +20,7 @@ export function parseClipboard(text: string): Array<Partial<ParseResult>> | unde
     if (!text || text.length === 0) return undefined;
 
     if (text.includes('www.muv-app.co')) return [muvParser(text)];
-    if (text.includes('"datos":[{')) return marangatuImportVirtualParser(text);
+    if (text.includes('"cantidadTotalEsEstimado"')) return marangatuImportVirtualParser(text);
     if (text.includes('Servicios de Banda Ancha')) return [tigoWifiParser(text)]
     if (text.includes('TELEFÓNICA CELULAR DEL PARAGUAY S.A.E.')) return [tigoTelefParser(text)]
 
