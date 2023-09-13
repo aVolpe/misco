@@ -37,16 +37,18 @@ export function Dashboard() {
         })
     }
 
-    async function saveImportedInvoice(toImport: Array<Partial<ParseResult>>) {
+    async function saveImportedInvoice(toImport: ParseWithTags) {
         const toAdd: ExpenseFormData[] = []
-        for (const data of toImport) {
+        for (const data of toImport.parsed) {
             if (!data.ruc) return;
             try {
                 const owner = data.owner
                     ? data.owner
                     : await state.searchRuc(data.ruc);
 
-                toAdd.push(mapToExpense(data, owner))
+                const mapped = mapToExpense(data, owner);
+                mapped.tags = toImport.tags;
+                toAdd.push(mapped)
                 message.info(`Factura ${data.identifier} de ${owner.name} importada`);
             } catch (e) {
                 message.warning(`No se encuentra el ruc ${data.ruc}`);
@@ -93,7 +95,7 @@ export function Dashboard() {
                           <DuplicateHelper expenses={state.expenses} onRemove={state.removeExpense}/>
                       </Tabs.TabPane>
                       <Tabs.TabPane tab="Conflictos con marangatu" key="4">
-                          <MarangatuConflictHelper />
+                          <MarangatuConflictHelper/>
                       </Tabs.TabPane>
                   </Tabs>}
         > {state.informer && <Informer informer={state.informer}/>} </BasePage>
@@ -114,12 +116,16 @@ export function Dashboard() {
     </>
 }
 
+type ParseWithTags = {
+    tags: string[],
+    parsed: Array<Partial<ParseResult>>
+}
 function ClipboardImporterModal(props: {
     visible: boolean,
     onCancel: () => void,
-    onOk: (v: Array<Partial<ParseResult>>) => void
+    onOk: (v: ParseWithTags) => void
 }) {
-    const [parsed, setParsed] = useState<Array<Partial<ParseResult>>>()
+    const [parsed, setParsed] = useState<ParseWithTags>()
 
     return <Modal open={props.visible}
                   okText="Importar"
@@ -127,7 +133,7 @@ function ClipboardImporterModal(props: {
                   okButtonProps={{disabled: !parsed}}
                   onOk={() => parsed && props.onOk(parsed)}
     >
-        <ClipboardImporter onNewParsed={p => setParsed(p)}/>
+        <ClipboardImporter onNewParsed={(p, t) => setParsed({parsed: p, tags: t})}/>
     </Modal>
 }
 
