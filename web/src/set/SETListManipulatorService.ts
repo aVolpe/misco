@@ -20,11 +20,19 @@ export class SETListManipulatorService {
         const typeToSearch = this.getTypeToSearch(toSearch);
         const tagToSearch = [...tags, ...this.getTagToSearch(toSearch)];
         const fullText = this.cleanSearch(toSearch);
-        const idToSearch = this._extractPropertySearch(toSearch, 'id');
+        const idParam = this._extractPropertySearch(toSearch, 'id');
+        const idRangeToSearch = idParam?.includes("..")
+            ? {
+                from: parseInt(idParam?.substring(0, idParam.indexOf(".."))),
+                to: parseInt(idParam?.substring(idParam.indexOf("..") + 2))
+            }
+            : undefined;
+        const idToSearch = !idRangeToSearch && idParam ? parseInt(idParam) : undefined;
         console.log({
             fullText,
             typeToSearch,
-            idToSearch,
+            idParam,
+            idRangeToSearch,
             tagToSearch: tagToSearch?.join(","),
             from: from.toString(),
             to: to.toString()
@@ -32,7 +40,10 @@ export class SETListManipulatorService {
         return data.filter(tf => {
             let valid = true;
             if (idToSearch) {
-                valid = parseInt(idToSearch) === tf.id;
+                valid = idToSearch === tf.id;
+            }
+            if (idRangeToSearch) {
+                valid = tf.id >= idRangeToSearch.from && tf.id <= idRangeToSearch.to;
             }
             if (valid && fullText)
                 valid = tf.name.toLowerCase().includes(fullText)
