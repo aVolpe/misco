@@ -24,7 +24,7 @@ const defaultExpense: ExpenseFormData = {
 
 export function ExpenseListPage(props: {
     data: Expense[];
-    onSave: (expense: ExpenseFormData, id?: number) => { wasNew: boolean };
+    onSave: (expense: ExpenseFormData, id?: number) => Promise<{ wasNew: boolean }>;
     doRemove: (expenseId: number) => void;
     owner: Person;
     type: PersonType;
@@ -42,8 +42,9 @@ export function ExpenseListPage(props: {
         setCurrentId(undefined);
     }
 
-    function onSave(d: ExpenseFormData) {
-        if (props.onSave(d, currentId).wasNew) {
+    async function onSave(d: ExpenseFormData) {
+        const result = await props.onSave(d, currentId);
+        if (result.wasNew) {
             message.info(`Factura ${d.expenseNumber} guardada`, 5);
             onNewExpense();
         } else {
@@ -93,7 +94,7 @@ export function ExpenseListPage(props: {
 function InvoiceEditor(props: {
     editType: 'NEW' | 'EDIT';
     current: ExpenseFormData;
-    onSave: (n: ExpenseFormData) => void;
+    onSave: (n: ExpenseFormData) => Promise<void>;
     onCancel: () => void;
     service: SETService
 }) {
@@ -110,6 +111,11 @@ function InvoiceEditor(props: {
             .catch(e => NRHelper.error(e));
     }, [owner, props.service]);
 
+    async function onSubmit(expense: ExpenseFormData) {
+        await props.onSave(expense);
+        setOwner(NRHelper.loaded(emptyOwner));
+    }
+
     useEffect(() => {
         if (toEdit.owner)
             setOwner(NRHelper.loaded(toEdit.owner))
@@ -119,10 +125,7 @@ function InvoiceEditor(props: {
 
     return <ExpenseForm owner={owner}
                         editType={props.editType}
-                        onSubmit={ev => {
-                            setOwner(NRHelper.loaded(emptyOwner));
-                            props.onSave(ev);
-                        }}
+                        onSubmit={onSubmit}
                         onCancel={props.onCancel}
                         expense={props.current}
                         onNewRuc={onNewRuc}/>;

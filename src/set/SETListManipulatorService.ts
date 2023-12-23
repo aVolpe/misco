@@ -118,6 +118,30 @@ export class SETListManipulatorService {
         return cleaned.trim();
     }
 
+    findByInvoiceNumber(invoiceNumber: string, identifier: string, expenses: Expense[], incomes: Income[]): {
+        income?: Income,
+        expense?: Expense
+    } {
+        console.log({invoiceNumber, identifier})
+        const income = incomes.find(f => f.voucher === invoiceNumber && f.identifier === identifier);
+        if (income) return {income};
+        const expense = expenses.find(f => f.voucher === invoiceNumber && f.identifier === identifier);
+        if (expense) return {expense};
+        return {};
+    }
+
+    findLastByIdentifier(identifier: string, expenses: Expense[], incomes: Income[]): {
+        income?: Income,
+        expense?: Expense
+    } {
+        const income = incomes.filter(f => f.identifier === identifier).sort((a, b) => a.date.localeCompare(b.date)).pop();
+        if (income) return {income};
+        const expense = expenses.filter(f => f.identifier === identifier).sort((a, b) => a.date.localeCompare(b.date)).pop();
+        if (expense) return {expense};
+        return {};
+    }
+
+
     filterAll(expenses: Expense[], incomes: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): {
         incomes: Income[],
         expenses: Expense[]

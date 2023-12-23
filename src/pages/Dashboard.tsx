@@ -12,6 +12,9 @@ import {Person} from '../RucAPI';
 import {DuplicateHelper} from './DuplicateHelper';
 import {BasePage} from '../components/BasePage';
 import {MarangatuConflictHelper} from './MarangatuConfilctHelper';
+import { SETService } from '../set/SETService';
+import { SETListManipulatorService } from '../set/SETListManipulatorService';
+import { Expense } from '../set/Model';
 
 
 export function Dashboard() {
@@ -58,6 +61,30 @@ export function Dashboard() {
         setClipboardImporter(false);
     }
 
+    async function saveExpense(expense: ExpenseFormData, id?: number): Promise<{wasNew: boolean}> {
+        const checks = !id && checkCommonMistakesOnNewInvoice(expense, state.expenses, new SETListManipulatorService());
+        if (!checks) { return state.saveExpense(expense, id); }
+
+        const { reason, expense: expenseToReplace } = checks;
+
+        return new Promise((resolve, reject) => {
+            Modal.warning({
+                title: reason,
+                content: `Esta seguro de que desea guardar de todos modos? La factura ${expenseToReplace.voucher} contiene coincidencias`,
+                cancelText: 'No',
+                okCancel: true,
+                okText: 'Guardar',
+                okType: 'danger',
+                onOk: () => {
+                    resolve(state.saveExpense(expense, id));
+                },
+                onCancel: () => {
+                    reject();
+                }
+            });
+        });
+    }
+
     if (state.isMigrating) {
         return <Result title="Cargando">
             Migrando datos a versión actual, por favor espere...
@@ -75,7 +102,7 @@ export function Dashboard() {
                   footer={<Tabs defaultActiveKey="1">
                       <Tabs.TabPane tab="Egresos" key="1">
                           <ExpenseListPage data={state.expenses}
-                                           onSave={state.saveExpense}
+                                           onSave={saveExpense}
                                            doRemove={state.removeExpense}
                                            type={state.informer?.type || 'FISICO'}
                                            owner={state.owner}
@@ -103,7 +130,7 @@ export function Dashboard() {
             title="Exportar datos"
             width={720}
             onClose={() => setShowExporter(false)}
-            visible={showExporter}
+            open={showExporter}
             bodyStyle={{paddingBottom: 80}}
             footer={<div style={{textAlign: 'right'}}>
                 <Button onClick={() => setShowExporter(false)} style={{marginRight: 8}}> Volver </Button>
@@ -147,4 +174,20 @@ function mapToExpense(p: Partial<ParseResult>, owner: Person): ExpenseFormData {
         isCredit: p.condition !== 'cash',
         owner: owner
     };
+}
+
+function checkCommonMistakesOnNewInvoice(data: ExpenseFormData, 
+    expenses: Expense[],
+    service: SETListManipulatorService): { reason: string, expense: Expense } | undefined {
+
+    const checkDigital = service.findLastByIdentifier(data.owner.doc, expenses, []);
+    if (checkDigital.expense && checkDigital.expense?.tags?.includes('ELECTRONIC_INVOICE')) {
+        return { reason: 'has_electronic_invoices', expense: checkDigital.expense };
+    }
+
+    const checkDup = service.findByInvoiceNumber(data.expenseNumber!, data.owner.doc, expenses, []);
+    if (checkDup.expense) {
+        return { reason: 'has_same_invoice', expense: checkDup.expense };
+    }
+
 }

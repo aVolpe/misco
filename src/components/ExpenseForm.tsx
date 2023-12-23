@@ -22,7 +22,7 @@ export interface ExpenseFormProps {
     expense?: ExpenseFormData,
     owner: Async<PersonWithLetterhead>
     onNewRuc: (ruc: string) => void;
-    onSubmit: (data: ExpenseFormData) => void;
+    onSubmit: (data: ExpenseFormData) => Promise<void>;
     onCancel: () => void;
     editType: 'NEW' | 'EDIT';
 }
@@ -78,8 +78,8 @@ export function ExpenseForm({
 
     }, [newLetterHead, form]);
 
-    function doIt(data: Store) {
-        onSubmit({
+    async function doIt(data: Store) {
+        await onSubmit({
             ...expense,
             amount: Number(data.amount),
             date: data.date,
