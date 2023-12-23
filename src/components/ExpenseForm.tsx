@@ -55,7 +55,7 @@ export function ExpenseForm({
 
     const [rucQuery, setRucQuery] = useState('');
     const [form] = Form.useForm();
-    const refDate = useRef<InputRef>(null);
+    const refDate = useRef<HTMLInputElement>(null);
 
     function onRucInput(key: string) {
         if (key === 'Enter') {
@@ -90,7 +90,7 @@ export function ExpenseForm({
             isCredit: data.isCredit,
             tags: data.tags
         });
-        if (refDate.current) refDate.current.focus();
+        refDate.current?.focus();
         setRucQuery('');
     }
 
@@ -118,6 +118,7 @@ export function ExpenseForm({
                     <Form.Item label="Fecha" name="date" rules={[{validator: checkValidDate}]}>
 
                         <AntMaskedInput
+                            ref={refDate}
                             placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
                             autoFocus
                             mask="__/__/__" 
