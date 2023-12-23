@@ -4,6 +4,7 @@
   "homepage": "https://files.volpe.com.py/misco/",
   "private": true,
   "dependencies": {
+    "@react-input/mask": "^1.0.20",
     "@rehooks/local-storage": "^2.4.4",
     "antd": "^5.5.2",
     "dayjs": "^1.11.8",

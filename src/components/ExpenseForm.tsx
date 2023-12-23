@@ -4,9 +4,19 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
-import {PersonWithLetterhead} from '../set/SETService';
+import {PersonWithLetterhead, SETService} from '../set/SETService';
 import {ExpenseDocumentType} from "../set/V2Enums";
 import {AS_OPTIONS} from '../tags/Model';
+import { AntMaskedInput} from './AntdMaskedInput';
+import { InputMask } from '@react-input/mask';
+import dayjs from 'dayjs';
+
+const checkValidDate = (_: any, value: string) => {
+    if (!dayjs(value, "DD/MM/YY", true).isValid()) {
+        return Promise.reject(new Error('Fecha inválida'))
+    }
+    return Promise.resolve();
+};
 
 export interface ExpenseFormProps {
     expense?: ExpenseFormData,
@@ -105,10 +115,12 @@ export function ExpenseForm({
                     amount: expense?.amount
                 }}>
 
-                    <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
-                        <Input ref={refDate}
-                               autoFocus
-                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"/>
+                    <Form.Item label="Fecha" name="date" rules={[{validator: checkValidDate}]}>
+
+                        <AntMaskedInput
+                            placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
+                            mask="__/__/__" 
+                            replacement={{ _: /\d/ }} />
                     </Form.Item>
 
                     <Form.Item label="Tipo egreso" name="type">
@@ -151,8 +163,10 @@ export function ExpenseForm({
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
-                                    <Input placeholder="001-002-1234567"
-                                           minLength={15} maxLength={15}/>
+                                    <AntMaskedInput
+                                        placeholder='001-001-0000000'
+                                        mask="___-___-_______" 
+                                        replacement={{ _: /\d/ }} />
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">

@@ -152,14 +152,14 @@ export class SETService {
         }
     }
 
-    private static mapDateToSetFormat(source: string) {
+    public static mapDateToSetFormat(source: string) {
         return dayjs(source, "DD/MM/YY").format("YYYY-MM-DD")
     }
 
     /**
      * Converts a date to the storage format
      */
-    private static dateToStorageFormat(source: string) {
+    public static dateToStorageFormat(source: string) {
         if (source.length === 10) {
             // it doesn't like a short date
             if (source === dayjs(source, "YYYY/MM/DD").format("YYYY/MM/DD")) {

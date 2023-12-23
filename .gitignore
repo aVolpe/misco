@@ -1,2 +1,4 @@
 .vim
-.remove
+remove
+node_modules
+dist
