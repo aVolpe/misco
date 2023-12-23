@@ -119,6 +119,7 @@ export function ExpenseForm({
 
                         <AntMaskedInput
                             placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
+                            autoFocus
                             mask="__/__/__" 
                             replacement={{ _: /\d/ }} />
                     </Form.Item>
