@@ -60,13 +60,13 @@ export function Dashboard() {
         state.addExpenses(toAdd);
         setClipboardImporter(false);
     }
-
+    
     async function saveExpense(expense: ExpenseFormData, id?: number): Promise<{wasNew: boolean}> {
         const checks = !id && checkCommonMistakesOnNewInvoice(expense, state.expenses, new SETListManipulatorService());
         if (!checks) { return state.saveExpense(expense, id); }
-
+        
         const { reason, expense: expenseToReplace } = checks;
-
+        
         return new Promise((resolve, reject) => {
             Modal.warning({
                 title: reason,

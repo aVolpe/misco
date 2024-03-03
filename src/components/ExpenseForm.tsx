@@ -1,20 +1,26 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Col, Form, Input, InputNumber, InputRef, Radio, Row, Select, Space} from 'antd';
-import React, {useEffect, useRef, useState} from 'react';
+import {Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space} from 'antd';
+import {useEffect, useRef, useState, KeyboardEvent} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
-import {PersonWithLetterhead, SETService} from '../set/SETService';
+import {PersonWithLetterhead} from '../set/SETService';
 import {ExpenseDocumentType} from "../set/V2Enums";
 import {AS_OPTIONS} from '../tags/Model';
-import { AntMaskedInput} from './AntdMaskedInput';
-import { InputMask } from '@react-input/mask';
+import {AntMaskedInput, focusNext} from './AntdMaskedInput';
 import dayjs from 'dayjs';
 
 const checkValidDate = (_: any, value: string) => {
     if (!dayjs(value, "DD/MM/YY", true).isValid()) {
         return Promise.reject(new Error('Fecha inválida'))
     }
+    return Promise.resolve();
+};
+
+const checkValidAmount = (_: any, value: string) => {
+    console.log(value);
+    const am = parseInt(value);
+    if (am < 1) return Promise.reject(new Error('Monto inválido'));
     return Promise.resolve();
 };
 
@@ -39,13 +45,13 @@ export interface ExpenseFormData {
 }
 
 export function ExpenseForm({
-                                expense,
-                                owner,
-                                onNewRuc,
-                                onSubmit,
-                                onCancel,
-                                editType
-                            }: ExpenseFormProps) {
+    expense,
+    owner,
+    onNewRuc,
+    onSubmit,
+    onCancel,
+    editType
+}: ExpenseFormProps) {
 
     const finalOwner = NRWrapper.of(owner).orElse({
         doc: '',
@@ -57,10 +63,11 @@ export function ExpenseForm({
     const [form] = Form.useForm();
     const refDate = useRef<HTMLInputElement>(null);
 
-    function onRucInput(key: string) {
-        if (key === 'Enter') {
+    function onRucInput(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') {
             onNewRuc(rucQuery.trim());
         }
+        return focusNext(e);
     }
 
     useEffect(() => {
@@ -121,28 +128,30 @@ export function ExpenseForm({
                             ref={refDate}
                             placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
                             autoFocus
-                            mask="__/__/__" 
-                            replacement={{ _: /\d/ }} />
+                            onKeyDown={focusNext}
+                            mask="__/__/__"
+                            replacement={{_: /\d/}} />
                     </Form.Item>
 
                     <Form.Item label="Tipo egreso" name="type">
                         <Select options={getAvailableTypes()}
-                                placeholder="Tipo de egreso"
-                                showSearch
+                            placeholder="Tipo de egreso"
+                            onInputKeyDown={focusNext}
+                            showSearch
                         />
                     </Form.Item>
 
                     <Form.Item label="Buscar por RUC">
                         <Input placeholder="4787587, Arturo Volpe, ASISMED"
-                               onKeyDown={evt => onRucInput(evt.key)}
-                               defaultValue={expense?.owner.doc}
-                               value={rucQuery}
-                               onBlur={evt => {
-                                   onNewRuc(evt.target.value);
-                               }}
-                               onChange={evt => setRucQuery(evt.target.value)}
+                            onKeyDown={onRucInput}
+                            defaultValue={expense?.owner.doc}
+                            value={rucQuery}
+                            onBlur={evt => {
+                                onNewRuc(evt.target.value);
+                            }}
+                            onChange={evt => setRucQuery(evt.target.value)}
                         />
-                        <Space direction="horizontal">
+                        <Space direction="vertical">
                             <span>Nombre: {finalOwner.name}</span>
                             <span>RUC: {finalOwner.doc}-{finalOwner.div}</span>
                         </Space>
@@ -156,35 +165,43 @@ export function ExpenseForm({
                             ) return null
                             return <>
                                 <Form.Item name="letterhead"
-                                           label="Timbrado"
-                                           rules={[{required: true}]}>
+                                    label="Timbrado"
+                                    rules={[{required: true, message: "Timbrado requerido"}]}>
 
                                     <Input placeholder="12345678"
-                                           maxLength={8}
-                                           minLength={8}/>
+                                        maxLength={8}
+                                        onKeyDown={focusNext}
+                                        minLength={8} />
                                 </Form.Item>
 
-                                <Form.Item label="Nro Factura" name="expenseNumber" rules={[{required: true}]}>
+                                <Form.Item label="Nro Factura" name="expenseNumber" rules={[
+                                    {required: true, message: "Requerido"}
+                                ]}>
                                     <AntMaskedInput
                                         placeholder='001-001-0000000'
-                                        mask="___-___-_______" 
-                                        replacement={{ _: /\d/ }} />
+                                        mask="___-___-_______"
+                                        onKeyDown={focusNext}
+                                        replacement={{_: /\d/}} />
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">
                                     <Radio.Group>
-                                        <Radio.Button value={true}>CRÉDITO</Radio.Button>
-                                        <Radio.Button value={false}>CONTADO</Radio.Button>
+                                        <Radio.Button value={true} onKeyDown={focusNext}>CRÉDITO</Radio.Button>
+                                        <Radio.Button value={false} onKeyDown={focusNext}>CONTADO</Radio.Button>
                                     </Radio.Group>
                                 </Form.Item>
                             </>
                         }}
                     </Form.Item>
 
-                    <Form.Item label="Monto" name="amount" rules={[{required: true}]}>
+                    <Form.Item label="Monto" name="amount" rules={[
+                        {required: true, message: "Monto requerido"},
+                        {validator: checkValidAmount}
+                    ]}>
                         <InputNumber style={{width: '100%'}}
-                                     formatter={a => formatMoney(a)}
-                                     parser={parseMoney}
+                            formatter={a => formatMoney(a)}
+                            onKeyDown={focusNext}
+                            parser={parseMoney}
                         />
                     </Form.Item>
 
@@ -194,6 +211,7 @@ export function ExpenseForm({
                             allowClear
                             style={{width: '100%'}}
                             placeholder="Elija un tag (no es requerido"
+                            onInputKeyDown={focusNext}
                             options={AS_OPTIONS}
                         />
                     </Form.Item>

@@ -110,7 +110,7 @@ function InvoiceEditor(props: {
             .then(r => setOwner(NRHelper.loaded(r)))
             .catch(e => NRHelper.error(e));
     }, [owner, props.service]);
-
+    
     async function onSubmit(expense: ExpenseFormData) {
         await props.onSave(expense);
         setOwner(NRHelper.loaded(emptyOwner));

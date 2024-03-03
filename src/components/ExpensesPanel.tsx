@@ -48,14 +48,14 @@ export function ExpensePanel(props: {
     function goNextMonth() {
         setDate(d => [
             d[0].startOf('month').add(1, 'month').startOf('month'),
-            d[1].startOf('month').add(1, 'month').endOf('month'),
+            d[0].startOf('month').add(1, 'month').endOf('month'),
         ]);
     }
 
     function goPrevMonth() {
         setDate(d => [
             d[0].startOf('month').subtract(1, 'month').startOf('month'),
-            d[1].startOf('month').subtract(1, 'month').endOf('month'),
+            d[0].startOf('month').subtract(1, 'month').endOf('month'),
         ]);
     }
 

@@ -117,7 +117,7 @@ export class SETListManipulatorService {
 
         return cleaned.trim();
     }
-
+    
     findByInvoiceNumber(invoiceNumber: string, identifier: string, expenses: Expense[], incomes: Income[]): {
         income?: Income,
         expense?: Expense
@@ -129,7 +129,7 @@ export class SETListManipulatorService {
         if (expense) return {expense};
         return {};
     }
-
+    
     findLastByIdentifier(identifier: string, expenses: Expense[], incomes: Income[]): {
         income?: Income,
         expense?: Expense
