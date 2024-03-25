@@ -11,7 +11,7 @@ export function query(searchTerm: string): Promise<QueryResult> {
 
     const final = searchTerm.replace(" +", "+");
 
-    return fetch(`https://sapi.volpe.com.py/find?query=${final}`)
+    return fetch(`https://sapi.volpe.com.py/api/data?query=${final}`)
         .then(result => result.json());
 
 }
