@@ -1,11 +1,12 @@
 import {Async, NRWrapper} from '../Model';
 import {Button, Col, Form, Input, InputNumber, InputRef, Radio, Row, Select} from 'antd';
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, KeyboardEvent} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
 import {formatMoney, parseMoney} from '../utils/formatters';
 import {PersonWithLetterhead} from '../set/SETService';
 import {IncomeType} from "../set/V2Enums";
+import {AntMaskedInput, focusNext} from './AntdMaskedInput';
 
 export interface IncomeFormProps {
     income?: IncomeFormData,
@@ -44,12 +45,13 @@ export function IncomeForm({
 
     const [rucQuery, setRucQuery] = useState('');
     const [form] = Form.useForm();
-    const refDate = useRef<InputRef>(null);
+    const refDate = useRef<HTMLInputElement>(null);
 
-    function onRucInput(key: string) {
-        if (key === 'Enter') {
+    function onRucInput(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') {
             onNewRuc(rucQuery.trim());
         }
+        return focusNext(e);
     }
 
     useEffect(() => {
@@ -102,9 +104,13 @@ export function IncomeForm({
                 }}>
 
                     <Form.Item label="Fecha" name="date" rules={[{required: true}]}>
-                        <Input ref={refDate}
-                               autoFocus
-                               placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"/>
+                        <AntMaskedInput
+                            ref={refDate}
+                            placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
+                            autoFocus
+                            onKeyDown={focusNext}
+                            mask="__/__/__"
+                            replacement={{_: /\d/}} />
                     </Form.Item>
 
                     <Form.Item label="Tipo ingreso" name="type">
@@ -116,7 +122,7 @@ export function IncomeForm({
 
                     <Form.Item label="Buscar por RUC">
                         <Input placeholder="4787587, Arturo Volpe, ASISMED"
-                               onKeyDown={evt => onRucInput(evt.key)}
+                               onKeyDown={onRucInput}
                                value={rucQuery}
                                defaultValue={income?.owner.doc}
                                onBlur={evt => {
@@ -138,20 +144,25 @@ export function IncomeForm({
                                 <Form.Item name="letterhead"
                                            label="Timbrado"
                                            rules={[{required: true}]}>
-                                    <Input placeholder="12345678"
-                                           maxLength={8}
-                                           minLength={8}/>
+                                    <AntMaskedInput
+                                        placeholder="12345678"
+                                        mask="________"
+                                        onKeyDown={focusNext}
+                                        replacement={{_: /\d/}} />
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="incomeNumber" rules={[{required: true}]}>
-                                    <Input placeholder="001-002-1234567"
-                                           minLength={15} maxLength={15}/>
+                                    <AntMaskedInput
+                                        placeholder='001-001-0000000'
+                                        mask="___-___-_______"
+                                        onKeyDown={focusNext}
+                                        replacement={{_: /\d/}} />
                                 </Form.Item>
 
                                 <Form.Item label="Crédito" name="isCredit">
                                     <Radio.Group defaultValue={false}>
-                                        <Radio.Button value={true}>CRÉDITO</Radio.Button>
-                                        <Radio.Button value={false}>CONTADO</Radio.Button>
+                                        <Radio.Button value={true} onKeyDown={focusNext}>CRÉDITO</Radio.Button>
+                                        <Radio.Button value={false} onKeyDown={focusNext}>CONTADO</Radio.Button>
                                     </Radio.Group>
                                 </Form.Item>
                             </>

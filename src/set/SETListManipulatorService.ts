@@ -142,13 +142,13 @@ export class SETListManipulatorService {
     }
 
 
-    filterAll(expenses: Expense[], incomes: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs): {
+    filterAll(expenses: Expense[], incomes: Income[], query: string | undefined, from: dayjs.Dayjs, to: dayjs.Dayjs, tags: string[]): {
         incomes: Income[],
         expenses: Expense[]
     } {
         const cat = this.getCatToSearch(query || '');
         if (!cat) return {
-            expenses: this.filterExpenses(expenses, query, from, to),
+            expenses: this.filterExpenses(expenses, query, from, to, tags),
             incomes: this.filterIncomes(incomes, query, from, to)
         }
         if (cat.startsWith('income')) {
@@ -160,7 +160,7 @@ export class SETListManipulatorService {
         if (cat.startsWith('expense')) {
             return {
                 incomes: [],
-                expenses: this.filterExpenses(expenses, query, from, to)
+                expenses: this.filterExpenses(expenses, query, from, to, tags)
             }
         }
         throw new Error(`invalid category: ${cat}`);

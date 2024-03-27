@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import {useLocalStorage} from '@rehooks/local-storage';
-import {App, Button, Col, DatePicker, Input, Row} from 'antd';
+import {App, Button, Col, DatePicker, Input, Row, Space} from 'antd';
 import {Expense, Income, User} from "../set/Model";
 import {SETExporter} from "../set/SETExporter";
 import dayjs, {Dayjs} from 'dayjs';
 import {SETListManipulatorService} from '../set/SETListManipulatorService';
 import {doExportToZip} from '../marangatu/ComprobanteMarangatuExporter';
 import FileSaver from 'file-saver';
+import {TagBar} from '../tags/MiscoTag';
 
 const monthFormat = 'MM/YYYY';
 
@@ -30,7 +31,7 @@ export function Exporter() {
         new SETExporter().downloadExcel(informer!, 'egresos', expenses!);
     }
 
-    function downloadRequirement(date: Dayjs, type: 'MENSUAL' | 'ANUAL', query?: string) {
+    function downloadRequirement(date: Dayjs, type: 'MENSUAL' | 'ANUAL', query: string, tags: string[]) {
         message.loading({content: 'Obteniendo registros', key: '955'});
         const filteredExpenses = new SETListManipulatorService()
             .filterAll(
@@ -38,7 +39,8 @@ export function Exporter() {
                 incomes,
                 query,
                 date.startOf(type === 'MENSUAL' ? 'month' : 'year'),
-                date.endOf(type === 'MENSUAL' ? 'month' : 'year'));
+                date.endOf(type === 'MENSUAL' ? 'month' : 'year'),
+                tags);
         console.log(`${type} - Query: ${query} - Period ${date} - To export: ${filteredExpenses.incomes.length} incomes and ${filteredExpenses.expenses.length} expenses`);
 
         const size = filteredExpenses.incomes.length + filteredExpenses.expenses.length;
@@ -57,7 +59,11 @@ export function Exporter() {
             })
             .catch(e => {
                 console.warn(e);
-                message.error({content: `No se puede guardar el archivo (${e}) (con ${size} registros)`, key: '955', duration: 15});
+                message.error({
+                    content: `No se puede guardar el archivo (${e}) (con ${size} registros)`,
+                    key: '955',
+                    duration: 15
+                });
             });
     }
 
@@ -106,70 +112,88 @@ export function Exporter() {
             </tbody>
         </table>
         <Col span={24}>
-            <div style={{textAlign: 'center'}}>
+            <Space direction="vertical">
                 <h3>
                     Exportar datos para el sistema Marangatu.
                 </h3>
-            </div>
-            <table style={{width: '100%'}}>
-                <tbody>
-                <tr>
-                    <td>
-                        <b>Obligación 955 - Registro mensual de comprobantes</b>
-                        <br/>
-                        <small>Todos los comprobantes, para ser importados a Marangatu</small>
-                    </td>
-                    <Download955 download955={(d, query) => downloadRequirement(d, 'MENSUAL', query)}/>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Obligación 956 - Registro Anual de Comprobantes</b>
-                        <br/>
-                        <small>Todos los comprobantes, para ser importados a Marangatu</small>
-                    </td>
-                    <Download956 download956={(d, query) => downloadRequirement(d, 'ANUAL', query)}/>
-                </tr>
-                </tbody>
-            </table>
+                <Download955 download955={(d, query, tags) => downloadRequirement(d, 'MENSUAL', query, tags)}/>
+                <Download956 download956={(d, query, tags) => downloadRequirement(d, 'ANUAL', query, tags)}/>
+            </Space>
         </Col>
 
     </Row>
 }
 
-function Download955(props: {
-    download955: (d: Dayjs, query?: string) => void
-}) {
+function Download955(props: Readonly<{
+    download955: (d: Dayjs, query: string, tags: string[]) => void
+}>) {
     const [date, setDate] = useState(dayjs().add(-1, 'm'));
     const [query, setQuery] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
 
-    return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
-        <Input value={query}
-               placeholder="Filtro opcional"
-               onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
-        <DatePicker value={date}
-                    style={{width: '100%'}}
-                    onChange={d => setDate(d!)}
-                    format={monthFormat}
-                    picker="month"/>
-        <Button onClick={() => props.download955(date, query)} style={{width: '100%'}}>Exportar</Button>
-    </td>
+    return <Row gutter={[8, 8]} style={{
+        border: '1px solid #c4c4c4',
+        borderRadius: 10,
+        padding: 5
+    }}>
+        <Col>
+            <b>Obligación 955 - Registro mensual de comprobantes</b><br/>
+            <small>Todos los comprobantes, para ser importados a Marangatu</small>
+        </Col>
+        <Col span={16}>
+            <Input value={query}
+                   placeholder="Filtro opcional"
+                   onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
+        </Col>
+        <Col span={8}>
+            <DatePicker value={date}
+                        style={{width: '100%'}}
+                        onChange={d => setDate(d!)}
+                        format={monthFormat}
+                        picker="month"/>
+        </Col>
+        <Col>
+            <TagBar onChanged={setTags}/>
+        </Col>
+        <Col span={24}>
+            <Button onClick={() => props.download955(date, query, tags)} style={{width: '100%'}}>Exportar</Button>
+        </Col>
+    </Row>
 }
 
-function Download956(props: {
-    download956: (d: Dayjs, query?: string) => void
-}) {
+function Download956(props: Readonly<{
+    download956: (d: Dayjs, query: string, tags: string[]) => void
+}>) {
     const [date, setDate] = useState(dayjs().add(-1, 'y'));
     const [query, setQuery] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
 
-    return <td style={{verticalAlign: 'bottom', textAlign: 'right'}}>
-        <Input value={query}
-               placeholder="Filtro opcional"
-               onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
-        <DatePicker value={date}
-                    style={{width: '100%'}}
-                    onChange={d => setDate(d!)}
-                    format="YYYY"
-                    picker="year"/>
-        <Button onClick={() => props.download956(date, query)} style={{width: '100%'}}>Exportar</Button>
-    </td>
+    return <Row gutter={[8, 8]} style={{
+        border: '1px solid #c4c4c4',
+        borderRadius: 10,
+        padding: 5
+    }}>
+        <Col>
+            <b>Obligación 956 - Registro Anual de Comprobantes</b><br/>
+            <small>Todos los comprobantes, para ser importados a Marangatu</small>
+        </Col>
+        <Col span={16}>
+            <Input value={query}
+                   placeholder="Filtro opcional"
+                   onChange={e => setQuery(e.target.value)} style={{width: '100%'}}/>
+        </Col>
+        <Col span={8}>
+            <DatePicker value={date}
+                        style={{width: '100%'}}
+                        onChange={d => setDate(d!)}
+                        format={monthFormat}
+                        picker="month"/>
+        </Col>
+        <Col>
+            <TagBar onChanged={setTags}/>
+        </Col>
+        <Col span={24}>
+            <Button onClick={() => props.download956(date, query, tags)} style={{width: '100%'}}>Exportar</Button>
+        </Col>
+    </Row>
 }

@@ -51,7 +51,7 @@ export function ExpenseForm({
     onSubmit,
     onCancel,
     editType
-}: ExpenseFormProps) {
+}: Readonly<ExpenseFormProps>) {
 
     const finalOwner = NRWrapper.of(owner).orElse({
         doc: '',
@@ -123,7 +123,6 @@ export function ExpenseForm({
                 }}>
 
                     <Form.Item label="Fecha" name="date" rules={[{validator: checkValidDate}]}>
-
                         <AntMaskedInput
                             ref={refDate}
                             placeholder="DD/MM/YY (si es salario, poner cualquier día del mes)"
@@ -167,11 +166,11 @@ export function ExpenseForm({
                                 <Form.Item name="letterhead"
                                     label="Timbrado"
                                     rules={[{required: true, message: "Timbrado requerido"}]}>
-
-                                    <Input placeholder="12345678"
-                                        maxLength={8}
+                                    <AntMaskedInput
+                                        placeholder="12345678"
+                                        mask="________"
                                         onKeyDown={focusNext}
-                                        minLength={8} />
+                                        replacement={{_: /\d/}} />
                                 </Form.Item>
 
                                 <Form.Item label="Nro Factura" name="expenseNumber" rules={[
@@ -211,7 +210,6 @@ export function ExpenseForm({
                             allowClear
                             style={{width: '100%'}}
                             placeholder="Elija un tag (no es requerido"
-                            onInputKeyDown={focusNext}
                             options={AS_OPTIONS}
                         />
                     </Form.Item>

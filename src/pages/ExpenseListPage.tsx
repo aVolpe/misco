@@ -91,13 +91,13 @@ export function ExpenseListPage(props: {
 }
 
 
-function InvoiceEditor(props: {
+function InvoiceEditor(props: Readonly<{
     editType: 'NEW' | 'EDIT';
     current: ExpenseFormData;
     onSave: (n: ExpenseFormData) => Promise<void>;
     onCancel: () => void;
     service: SETService
-}) {
+}>) {
 
     const [owner, setOwner] = useState<Async<PersonWithLetterhead>>(NRHelper.loaded(props.current.owner));
     const toEdit = props.current;
@@ -110,7 +110,7 @@ function InvoiceEditor(props: {
             .then(r => setOwner(NRHelper.loaded(r)))
             .catch(e => NRHelper.error(e));
     }, [owner, props.service]);
-    
+
     async function onSubmit(expense: ExpenseFormData) {
         await props.onSave(expense);
         setOwner(NRHelper.loaded(emptyOwner));

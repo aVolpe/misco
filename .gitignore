@@ -2,3 +2,4 @@
 remove
 node_modules
 dist
+.idea
