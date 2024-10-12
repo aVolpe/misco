@@ -34,7 +34,7 @@ export const AntMaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((pr
 });
 
 export function focusNext(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.which === 13) {
+    if (e.key === 'Enter') {
         const target: HTMLInputElement  = e.currentTarget;
         const form = target.form
         if (form == null) return false;

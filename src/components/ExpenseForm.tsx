@@ -101,6 +101,15 @@ export function ExpenseForm({
         setRucQuery('');
     }
 
+    function letterheadKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.altKey && ['d', 'ð'].includes(e.key)) {
+            e.preventDefault();
+            form.setFieldValue('letterhead', '');
+            return;
+        }
+        focusNext(e);
+    }
+
 
     return <GlobalHotKeys
         keyMap={{
@@ -169,7 +178,7 @@ export function ExpenseForm({
                                     <AntMaskedInput
                                         placeholder="12345678"
                                         mask="________"
-                                        onKeyDown={focusNext}
+                                        onKeyDown={letterheadKeyDown}
                                         replacement={{_: /\d/}} />
                                 </Form.Item>
 

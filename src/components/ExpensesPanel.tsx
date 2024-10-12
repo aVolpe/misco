@@ -59,6 +59,13 @@ export function ExpensePanel(props: {
         ]);
     }
 
+    function onQueryKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.altKey && ['d', 'ð'].includes(e.key)) {
+            e.preventDefault();
+            setQuery('');
+        }
+    }
+
     return <>
         <Row gutter={[8, 8]} align="middle">
             <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}} offset={1}>
@@ -69,7 +76,8 @@ export function ExpensePanel(props: {
                        value={query}
                        allowClear
                        style={{width: '100%'}}
-                       onChange={t => setQuery(t.target.value)}/>
+                       onKeyDown={onQueryKeyDown}
+                       onChange={e => setQuery(e.target.value)}/>
                 <TagBar onChanged={setTags}/>
             </Col>
             <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}}>
@@ -79,20 +87,25 @@ export function ExpensePanel(props: {
                 <DatePicker.RangePicker value={date}
                                         style={{width: '100%'}}
                                         allowClear={false}
-                                        ranges={{
-                                            [new Date().getFullYear() - 2]: [
+                                        presets={[{
+                                            label: new Date().getFullYear() - 2,
+                                            value: [
                                                 dayjs().subtract(2, 'year').startOf('year'),
                                                 dayjs().subtract(2, 'year').endOf('year'),
-                                            ],
-                                            [new Date().getFullYear() - 1]: [
+                                            ]
+                                        }, {
+                                            label: new Date().getFullYear() - 1,
+                                            value: [
                                                 dayjs().subtract(1, 'year').startOf('year'),
                                                 dayjs().subtract(1, 'year').endOf('year'),
-                                            ],
-                                            [new Date().getFullYear()]: [
-                                                dayjs().startOf('year'),
-                                                dayjs().endOf('year')
                                             ]
-                                        }}
+                                        }, {
+                                            label: new Date().getFullYear(),
+                                            value: [
+                                                dayjs().startOf('year'),
+                                                dayjs().endOf('year'),
+                                            ],
+                                        }]}
                                         renderExtraFooter={() => <Space.Compact block style={{
                                             justifyContent: 'center',
                                             padding: 2
