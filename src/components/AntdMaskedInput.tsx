@@ -27,7 +27,7 @@ export const AntMaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((pr
         ref={ref}
         autoFocus={props.autoFocus}
         placeholder={props.placeholder}
-        value={props.value}
+        value={props.value as number}
         onChange={props.onChange} 
 
         />;
