@@ -28,6 +28,24 @@ export function parseClipboard(text: string): Array<Partial<ParseResult>> | unde
     return undefined;
 }
 
+export function merge(origin?: Array<Partial<ParseResult>>, newData?: Array<Partial<ParseResult>>): Array<Partial<ParseResult>> | undefined {
+    if (!origin) return newData;
+    if (!newData) return origin;
+
+    const toRet = [...origin];
+    for (const toCheck of newData) {
+        if (!toCheck.identifier) toRet.push(toCheck);
+        if (origin.find(o => o.identifier === toCheck.identifier)) {
+            // TODO return this to show a message to th euser
+            console.log(`Ignoring ${toCheck.identifier} form merged data`);
+        } else {
+            toRet.push(toCheck);
+        }
+    }
+    return toRet;
+}
+
+
 function tigoWifiParser(text: string): Partial<ParseResult> {
 
     (window as any).text = text;

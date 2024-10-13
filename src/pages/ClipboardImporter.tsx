@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {Button, Col, Row, Select, Tabs} from 'antd';
-import {parseClipboard, ParseResult} from '../import_parsers/ClipboardParser';
+import {useEffect, useState} from "react";
+import {Button, Col, Flex, Row, Select, Tabs} from 'antd';
+import {merge, parseClipboard, ParseResult} from '../import_parsers/ClipboardParser';
 import {JsonTable} from '../components/JsonTable';
 import {AS_OPTIONS} from '../tags/Model';
+import {formatMoney} from "../utils/formatters";
 
 export function ClipboardImporter(props: {
     onNewParsed: (parsed: Array<Partial<ParseResult>>, tags: string[]) => void
@@ -19,6 +20,13 @@ export function ClipboardImporter(props: {
         if (t) props.onNewParsed(t, tags);
     }
 
+    function append() {
+        const newData = parseClipboard(raw);
+        const merged = merge(parsed, newData);
+        setParsed(merged);
+        if (merged) props.onNewParsed(merged, tags);
+    }
+
     useEffect(() => {
         if (parsed)
             props.onNewParsed(parsed, tags);
@@ -29,18 +37,33 @@ export function ClipboardImporter(props: {
             <textarea style={{width: '100%'}} value={raw} onChange={e => setRaw(e.target.value)}/>
         </Col>
         <Col span={24}>
-            <Button onClick={doParse}>Parsear</Button>
-            <Button onClick={() => {
+            <Flex gap="small" wrap>
+            <Button onClick={doParse} type="primary">Parsear</Button>
+            <Button onClick={append}>Agregar</Button>
+            <Button danger onClick={() => {
                 setParsed(undefined);
                 setRaw('');
             }}>Limpiar</Button>
+            </Flex>
         </Col>
         {parsed && <Col span={24}>
-          <h2>Vista previa</h2>
+          <h2>Vista previa, total {parsed.length}.</h2>
           <Tabs defaultActiveKey="table" items={[{
               key: 'table',
               label: 'Table',
-              children: <JsonTable rowKey="identifier" data={parsed || []}/>
+              children: <JsonTable 
+                  rowKey="identifier" 
+                  data={parsed || []} 
+                  columns={{
+                      "total": {
+                        title: 'total',
+                        dataIndex: 'total',
+                        sorter: (a, b) => a.total - b.total,
+                        align: 'right',
+                        render: a => formatMoney(a)
+                      }
+                  }}
+          />
           }, {
               key: 'json',
               label: 'Json',
