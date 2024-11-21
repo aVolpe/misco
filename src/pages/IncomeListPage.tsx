@@ -182,7 +182,9 @@ function IncomeTable(props: {
             render: (a: number) => formatMoney(a),
             sorter: (a, b) => a.amount - b.amount,
         }, {
-            title: 'Acciones', dataIndex: '', render: (_, row) => {
+            title: 'Acciones', 
+            align: 'right',
+            dataIndex: '', render: (_, row) => {
                 return <>
                     <Button onClick={() => props.onEdit(row)}>Editar</Button>
                     <Button danger onClick={() => props.onRemove(row)}>Eliminar</Button>

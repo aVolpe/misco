@@ -10,6 +10,7 @@ import {formatMoney} from '../utils/formatters';
 import {sumBy} from 'lodash';
 import {MiscoTag, TagBar} from '../tags/MiscoTag';
 import {SETService} from '../set/SETService';
+import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
 export function ExpensePanel(props: {
     period: number;
@@ -68,10 +69,10 @@ export function ExpensePanel(props: {
 
     return <>
         <Row gutter={[8, 8]} align="middle">
-            <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}} offset={1}>
+            <Col span={2} style={{textAlign: 'left', fontWeight: 'bold'}} offset={0}>
                 Búsqueda:
             </Col>
-            <Col span={9}>
+            <Col span={10}>
                 <Input placeholder="Por ruc/nombre/nro factura"
                        value={query}
                        allowClear
@@ -83,7 +84,7 @@ export function ExpensePanel(props: {
             <Col span={2} style={{textAlign: 'right', fontWeight: 'bold'}}>
                 Rango:
             </Col>
-            <Col span={9}>
+            <Col span={10}>
                 <DatePicker.RangePicker value={date}
                                         style={{width: '100%'}}
                                         allowClear={false}
@@ -184,6 +185,7 @@ function ExpenseTable(props: {
         }, {
             title: 'Fecha',
             dataIndex: 'date',
+            align: 'right',
             sorter: (a, b) => a.date.localeCompare(b.date),
             render: (d) => <Typography.Text
                 copyable={props.showCopy && {text: SETService.mapLocalToMoment(d).format("DD/MM/YYYY")}}>{d}</Typography.Text>
@@ -211,10 +213,13 @@ function ExpenseTable(props: {
                 copyable={props.showCopy && {text: a.toString()}}>{formatMoney(a)}</Typography.Text>,
             sorter: (a, b) => a.amount - b.amount,
         }, props.hideActions === true ? {} : {
-            title: 'Acciones', dataIndex: '', render: (_, row) => {
+            title: 'Acciones', 
+            dataIndex: '', 
+            align: 'right',
+            render: (_, row) => {
                 return <>
-                    <Button onClick={() => props.onEdit(row)}>Editar</Button>
-                    <Button danger onClick={() => props.onRemove(row)}>Eliminar</Button>
+                    <Button icon={<EditOutlined />} onClick={() => props.onEdit(row)}></Button>
+                    <Button danger icon={<DeleteOutlined />} onClick={() => props.onRemove(row)}></Button>
                 </>
             }
         }]}
