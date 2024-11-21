@@ -10,26 +10,42 @@ interface MaskedInputProps extends InputProps {
 export const AntMaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((props, ref) => {
 
 
-    return <InputMask 
-        mask={props.mask}
-        replacement={props.replacement}
-        className="ant-input"
+    return <span className="ant-input-affix-wrapper ant-input-outlined" 
         style={{
-            lineHeight: 2,
-            borderRadius: 6,
-            border: '1px solid #d9d9d9',
-            padding: 4,
-            paddingLeft: 10,
-            width: 'calc(100% - 16px)'
-        }}
-        onKeyDown={props.onKeyDown}
-        ref={ref}
-        autoFocus={props.autoFocus}
-        placeholder={props.placeholder}
-        value={props.value as number}
-        onChange={props.onChange} 
+                borderRadius: 6,
+                border: '1px solid #d9d9d9',
+                padding: 4,
+                paddingLeft: 10,
+                width: 'calc(100% - 16px)',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 4,
+                alignItems: 'center',
+                alignContent: 'space-between'
+            }}>
+        <InputMask 
+            mask={props.mask}
+            replacement={props.replacement}
+            style={{
+                border: 'none',
+                lineHeight: 2,
+                flexGrow: 2
+            }}
+            className="ant-input"
+            onKeyDown={props.onKeyDown}
+            ref={ref}
+            autoFocus={props.autoFocus}
+            placeholder={props.placeholder}
+            value={props.value as number}
+            onChange={props.onChange} 
 
-    />;
+        />
+        <span style={{
+            color: 'darkgray'
+        }}>
+            {props.value?.toString().length}/{props.mask?.length}
+        </span>
+    </span>
 });
 
 export function focusNext(e: KeyboardEvent<HTMLInputElement>) {
