@@ -1,5 +1,5 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Space, Typography} from 'antd';
+import {Alert, Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space, Typography} from 'antd';
 import {useEffect, useRef, useState, KeyboardEvent} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
@@ -9,6 +9,7 @@ import {ExpenseDocumentType} from "../set/V2Enums";
 import {AS_OPTIONS} from '../tags/Model';
 import {AntMaskedInput, focusNext} from './AntdMaskedInput';
 import dayjs from 'dayjs';
+import {LoadingOutlined} from '@ant-design/icons';
 
 const checkValidDate = (_: any, value: string) => {
     if (!dayjs(value, "DD/MM/YY", true).isValid()) {
@@ -161,10 +162,12 @@ export function ExpenseForm({
                             }}
                             onChange={evt => setRucQuery(evt.target.value)}
                         />
-                        <Space direction="vertical" style={{rowGap: 0}}>
+                        {owner.state === 'FETCHING' && <LoadingOutlined />}
+                        {owner.state === 'ERROR' && <Alert type="error" showIcon message="No encontrado" style={{marginTop: 4}}/>}
+                        {owner.state === "LOADED" &&  <Space direction="vertical" style={{rowGap: 0}}>
                             <span>Nombre: {finalOwner.name}</span>
                             <span>RUC: {finalOwner.doc}-{finalOwner.div}</span>
-                        </Space>
+                        </Space>}
                     </Form.Item>
 
                     <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.type !== curValues.type}>

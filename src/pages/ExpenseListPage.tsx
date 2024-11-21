@@ -106,9 +106,10 @@ function InvoiceEditor(props: Readonly<{
         if (ruc === NRWrapper.of(owner).map(o => o?.doc).orElse('')) {
             return;
         }
+        setOwner(NRHelper.fetching);
         props.service.findRuc(ruc)
             .then(r => setOwner(NRHelper.loaded(r)))
-            .catch(e => NRHelper.error(e));
+            .catch(e => setOwner(NRHelper.error(e)));
     }, [owner, props.service]);
 
     async function onSubmit(expense: ExpenseFormData) {
