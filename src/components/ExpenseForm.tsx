@@ -1,5 +1,5 @@
 import {Async, NRWrapper} from '../Model';
-import {Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space} from 'antd';
+import {Button, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Space, Typography} from 'antd';
 import {useEffect, useRef, useState, KeyboardEvent} from 'react';
 import {Store} from 'rc-field-form/lib/interface';
 import {GlobalHotKeys} from 'react-hotkeys';
@@ -118,9 +118,11 @@ export function ExpenseForm({
         handlers={{
             SAVE_EXPENSE: form.submit
         }}>
-        <Row gutter={16} style={{padding: 8}}>
+        <Row gutter={8} style={{paddingLeft: 8, paddingRight: 8}}>
             <Col span={24}>
-                <h1>{editType === 'EDIT' ? 'Editando' : 'Creando'}</h1>
+                <Typography.Title level={3} style={{marginTop: 8, marginBottom: 8}}>
+                    {editType === 'EDIT' ? `Editando factura` : 'Creando'}
+                </Typography.Title>
             </Col>
             <Col span={24}>
                 <Form layout="vertical" form={form} onFinish={doIt} wrapperCol={{span: 24}} initialValues={{
@@ -159,7 +161,7 @@ export function ExpenseForm({
                             }}
                             onChange={evt => setRucQuery(evt.target.value)}
                         />
-                        <Space direction="vertical">
+                        <Space direction="vertical" style={{rowGap: 0}}>
                             <span>Nombre: {finalOwner.name}</span>
                             <span>RUC: {finalOwner.doc}-{finalOwner.div}</span>
                         </Space>
@@ -218,7 +220,7 @@ export function ExpenseForm({
                             mode="multiple"
                             allowClear
                             style={{width: '100%'}}
-                            placeholder="Elija un tag (no es requerido"
+                            placeholder="Elija un tag (no es requerido)"
                             options={AS_OPTIONS}
                         />
                     </Form.Item>
@@ -226,8 +228,10 @@ export function ExpenseForm({
                     <pre hidden>{JSON.stringify(expense?.type, null, 2)}</pre>
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" style={{width: '50%'}}>Guardar (Control+g)</Button>
-                        <Button type="default" onClick={onCancel} style={{width: '50%'}}>Cancelar</Button>
+                        <Space>
+                            <Button type="primary" htmlType="submit">Guardar (Control+g)</Button>
+                            <Button type="default" onClick={onCancel}>Cancelar</Button>
+                        </Space>
                     </Form.Item>
 
                 </Form>

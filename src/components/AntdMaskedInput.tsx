@@ -11,17 +11,16 @@ export const AntMaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((pr
 
 
     return <InputMask 
-
         mask={props.mask}
         replacement={props.replacement}
         className="ant-input"
         style={{
-            width: '98%',
-                lineHeight: 2,
-                borderRadius: 6,
-                border: '1px solid #d9d9d9',
-                padding: 4,
-                paddingLeft: 8
+            lineHeight: 2,
+            borderRadius: 6,
+            border: '1px solid #d9d9d9',
+            padding: 4,
+            paddingLeft: 10,
+            width: 'calc(100% - 16px)'
         }}
         onKeyDown={props.onKeyDown}
         ref={ref}
@@ -30,7 +29,7 @@ export const AntMaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>((pr
         value={props.value as number}
         onChange={props.onChange} 
 
-        />;
+    />;
 });
 
 export function focusNext(e: KeyboardEvent<HTMLInputElement>) {

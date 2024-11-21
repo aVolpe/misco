@@ -76,7 +76,7 @@ export function ExpenseListPage(props: {
                               period={props.period}
                 />
             </Col>
-            <Col span={6} style={{border: '1px solid rgb(235, 237, 240)'}}>
+            <Col span={6} style={{border: '1px solid rgb(235, 237, 240)', padding: 4, borderRadius: 10}}>
                 {current
                     ? <InvoiceEditor current={current}
                                      service={service}
