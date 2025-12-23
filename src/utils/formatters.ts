@@ -3,7 +3,7 @@ export function formatMoney(value: any, symbol?: string, decimalDigits?: number)
     if (typeof value === 'string' && value.startsWith('Gs')) return value;
 
     const amount = decimalDigits ? value : Math.round(value);
-    const formattedAmount = new Intl.NumberFormat('it', {
+    const formattedAmount = new Intl.NumberFormat('es-PY', {
         minimumFractionDigits: decimalDigits || 0,
         maximumFractionDigits: decimalDigits || 0
     }).format(amount);
