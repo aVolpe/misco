@@ -149,7 +149,7 @@ type MarangatuImportVirtual = {
         importeTotal: number,
         totalIva?: number,
         totalImporteSinIva?: number,
-        condicionCompra: 'Contado' | 'Credito',
+        condicionCompra: 'CONTADO' | 'CREDITO',
         cantidadCuotas: unknown,
         elegido: unknown,
         formaPresentacion: 'ELECTRÓNICO',
@@ -168,7 +168,7 @@ function marangatuImportVirtualParser(text: string): ParseResult[] {
         if (!(['FACTURA ELECTRÓNICA', 'FACTURA'].includes(d.tipoComprobante))) throw new Error(`Unknown type ${d.tipoComprobante}`)
         return {
             date: dayjs(d.fechaExpedicionComprobante, "DD/MM/YYYY").format("YYYY/MM/DD"),
-            condition: d.condicionCompra === 'Contado' ? 'cash' : 'credit',
+            condition: d.condicionCompra === 'CONTADO' ? 'cash' : 'credit',
             identifier: d.numeroComprobante,
             letterhead: d.timbrado,
             ruc: d.rucVendedor + "",
